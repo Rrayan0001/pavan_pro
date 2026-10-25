@@ -28,5 +28,6 @@ export function getEmbeddingsModel() {
   return new GoogleGenerativeAIEmbeddings({
     model: env.GEMINI_EMBEDDING_MODEL,
     apiKey: env.GOOGLE_API_KEY,
+    outputDimensionality: 768,
   });
 }

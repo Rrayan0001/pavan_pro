@@ -2,35 +2,135 @@ import "server-only";
 
 import { supabase, type BookRow } from "@/lib/db/supabase";
 import { getEmbeddingsModel } from "@/lib/llm";
-import type { Preferences, Book } from "@/lib/schemas";
+import { searchGoogleBooks } from "@/lib/retrieval/googleBooks";
+import type { Preferences, Book, Level } from "@/lib/schemas";
 import { amazonSearchUrl } from "@/lib/utils";
 
 /**
- * Search the curated book catalog using SQL filters + vector similarity.
- * Returns books sorted by vector similarity.
+ * Search the curated book catalog using SQL filters + vector similarity,
+ * augmented with live Google Books API results for queries with specific moods/subgenres.
+ * Returns books sorted by relevance.
  */
 export async function searchCatalog(
   preferences: Preferences,
-  limit: number = 10
+  limit: number = 10,
+  rawUserMessage?: string
 ): Promise<Book[]> {
   const results: Book[] = [];
 
+  // Step 0: If user asked about a specific book title, look for exact or ilike title match first!
+  if (preferences.targetBookQuery) {
+    const { data: titleMatches } = await supabase
+      .from("books")
+      .select("*")
+      .ilike("title", `%${preferences.targetBookQuery.trim()}%`)
+      .limit(3);
+
+    if (titleMatches && titleMatches.length > 0) {
+      results.push(...titleMatches.map(rowToBook));
+    }
+  }
+
   // Step 1: SQL filter for exact genre + level matches
   const sqlBooks = await sqlFilterBooks(preferences, limit);
-  results.push(...sqlBooks);
+  const existingIds = new Set(results.map((b) => b.id));
+  for (const b of sqlBooks) {
+    if (!existingIds.has(b.id)) {
+      results.push(b);
+      existingIds.add(b.id);
+    }
+  }
 
   // Step 2: Vector similarity search if we have mood/similarTo cues
-  if (preferences.mood.length > 0 || preferences.similarTo.length > 0) {
+  if (preferences.mood.length > 0 || preferences.similarTo.length > 0 || preferences.targetBookQuery) {
     const vectorBooks = await vectorSearchBooks(preferences, limit);
 
-    // Merge, deduplicate by id
-    const existingIds = new Set(results.map((b) => b.id));
     for (const book of vectorBooks) {
       if (!existingIds.has(book.id)) {
         results.push(book);
         existingIds.add(book.id);
       }
     }
+  }
+
+  // Step 3: Live Google Books API search for diverse, real-time candidates
+  // This ensures users aren't limited to the curated seed database when asking for
+  // specific subgenres (e.g. "rom-com thriller", "enemies to lovers") or niche tastes.
+  try {
+    const isSpecificQuery =
+      preferences.mood.length > 0 ||
+      preferences.similarTo.length > 0 ||
+      preferences.genres.length > 1 ||
+      (rawUserMessage && rawUserMessage.trim().split(" ").length > 2);
+
+    if (results.length < limit || isSpecificQuery) {
+      const searchTerms: string[] = [];
+
+      if (rawUserMessage && rawUserMessage.trim().length <= 60) {
+        searchTerms.push(rawUserMessage.trim());
+      } else {
+        if (preferences.genres.length > 0) {
+          searchTerms.push(preferences.genres.join(" "));
+        }
+        if (preferences.mood.length > 0) {
+          searchTerms.push(preferences.mood.slice(0, 2).join(" "));
+        }
+        if (preferences.similarTo.length > 0) {
+          searchTerms.push(preferences.similarTo.slice(0, 2).join(" "));
+        }
+      }
+
+      const queryString = searchTerms.join(" ").trim();
+      if (queryString) {
+        const apiCandidates = await searchGoogleBooks(queryString, 8);
+        for (const apiBook of apiCandidates) {
+          if (!apiBook.title || !apiBook.author) continue;
+
+          // Avoid duplicates
+          const titleLower = apiBook.title.toLowerCase();
+          if (
+            results.some(
+              (r) =>
+                r.title.toLowerCase() === titleLower ||
+                r.title.toLowerCase().includes(titleLower) ||
+                titleLower.includes(r.title.toLowerCase())
+            )
+          ) {
+            continue;
+          }
+
+          const pageCount = apiBook.pageCount ?? null;
+          let inferredLevel: Level = "intermediate";
+          if (pageCount && pageCount <= 300) inferredLevel = "beginner";
+          else if (pageCount && pageCount > 450) inferredLevel = "advanced";
+
+          const book: Book = {
+            id: crypto.randomUUID(),
+            title: apiBook.title,
+            author: apiBook.author,
+            genres:
+              preferences.genres.length > 0
+                ? preferences.genres
+                : (apiBook.genres && apiBook.genres.length > 0 ? apiBook.genres : ["fiction"]),
+            level: preferences.level ?? inferredLevel,
+            complexity:
+              inferredLevel === "beginner" ? 2 : inferredLevel === "intermediate" ? 3 : 4,
+            pacing: "medium",
+            tone: preferences.mood.length > 0 ? preferences.mood : ["engaging"],
+            pageCount,
+            description: apiBook.description ?? null,
+            coverUrl: apiBook.coverUrl ?? null,
+            avgRating: apiBook.avgRating ?? 4.0,
+            whyStartHere: `Verified book fact lookup via Google Books API matching "${queryString}".`,
+            amazonSearchUrl: apiBook.amazonSearchUrl,
+          };
+
+          results.push(book);
+        }
+      }
+    }
+  } catch (apiErr) {
+    console.error("Live Google Books candidate retrieval failed:", apiErr);
   }
 
   return results;

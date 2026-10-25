@@ -8,11 +8,16 @@
 import { createClient } from "@supabase/supabase-js";
 import curatedBooks from "./data/curated-books.json";
 
-// Load env vars
-import "dotenv/config";
+// Load env vars from .env.local, .env, or process.env
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
+dotenv.config(); // fallback to .env if present
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY!;
 const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
 const EMBEDDING_MODEL = process.env.GEMINI_EMBEDDING_MODEL || "text-embedding-004";
@@ -47,8 +52,28 @@ async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function enrichFromOpenLibrary(title: string, author: string) {
+  try {
+    const q = encodeURIComponent(`${title} ${author}`);
+    const res = await fetch(`https://openlibrary.org/search.json?q=${q}&limit=1`, {
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const doc = data.docs?.[0];
+    if (!doc) return null;
+    return {
+      cover_url: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg` : null,
+      page_count: doc.number_of_pages_median ?? null,
+      description: doc.first_sentence?.[0] ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /**
- * Search Google Books for a book by title + author
+ * Search Google Books for a book by title + author, with Open Library fallback
  */
 async function enrichFromGoogleBooks(
   title: string,
@@ -73,52 +98,37 @@ async function enrichFromGoogleBooks(
     }
 
     const response = await fetch(`${GOOGLE_BOOKS_API}?${params}`, {
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(6000),
     });
 
-    if (!response.ok) {
-      console.warn(`  ⚠ Google Books returned ${response.status} for "${title}"`);
-      return {
-        description: null,
-        cover_url: null,
-        avg_rating: null,
-        google_books_id: null,
-        page_count: null,
-      };
+    if (response.ok) {
+      const data = await response.json();
+      if (data.items?.length) {
+        const best = data.items[0];
+        const info = best.volumeInfo;
+        return {
+          description: info.description ?? null,
+          cover_url:
+            info.imageLinks?.thumbnail?.replace("http:", "https:") ?? null,
+          avg_rating: info.averageRating ?? null,
+          google_books_id: best.id,
+          page_count: info.pageCount ?? null,
+        };
+      }
     }
-
-    const data = await response.json();
-    if (!data.items?.length) {
-      return {
-        description: null,
-        cover_url: null,
-        avg_rating: null,
-        google_books_id: null,
-        page_count: null,
-      };
-    }
-
-    const best = data.items[0];
-    const info = best.volumeInfo;
-
-    return {
-      description: info.description ?? null,
-      cover_url:
-        info.imageLinks?.thumbnail?.replace("http:", "https:") ?? null,
-      avg_rating: info.averageRating ?? null,
-      google_books_id: best.id,
-      page_count: info.pageCount ?? null,
-    };
   } catch (error) {
-    console.warn(`  ⚠ Google Books lookup failed for "${title}":`, error);
-    return {
-      description: null,
-      cover_url: null,
-      avg_rating: null,
-      google_books_id: null,
-      page_count: null,
-    };
+    // Fall through to Open Library
   }
+
+  // Open Library fallback
+  const ol = await enrichFromOpenLibrary(title, author);
+  return {
+    description: ol?.description ?? null,
+    cover_url: ol?.cover_url ?? null,
+    avg_rating: null,
+    google_books_id: null,
+    page_count: ol?.page_count ?? null,
+  };
 }
 
 /**
@@ -131,6 +141,7 @@ async function generateEmbedding(text: string): Promise<number[] | null> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         content: { parts: [{ text }] },
+        outputDimensionality: 768,
       }),
       signal: AbortSignal.timeout(15000),
     });
@@ -173,11 +184,14 @@ async function main() {
   console.log("========================\n");
 
   if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.error("❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+    console.error("❌ Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+    console.error("   Please ensure .env.local has your Supabase URL and Publishable Key.");
     process.exit(1);
   }
-  if (!GOOGLE_API_KEY) {
-    console.error("❌ Missing GOOGLE_API_KEY (needed for embeddings)");
+  if (!GOOGLE_API_KEY || GOOGLE_API_KEY === "your_gemini_api_key_here") {
+    console.error("❌ Missing or placeholder GOOGLE_API_KEY");
+    console.error("   The seed script generates vector embeddings for each book using Gemini.");
+    console.error("   Please set your real GOOGLE_API_KEY in .env.local (get a free key at https://aistudio.google.com/app/apikey).");
     process.exit(1);
   }
 

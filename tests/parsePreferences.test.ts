@@ -94,12 +94,12 @@ describe("RecommendRequestSchema Validation", () => {
     expect(result.success).toBe(false);
   });
 
-  it("enforces message character limit of 500 characters", () => {
-    const longMessage = "a".repeat(501);
+  it("enforces message character limit of 4000 characters", () => {
+    const longMessage = "a".repeat(4001);
     const result = RecommendRequestSchema.safeParse({ message: longMessage });
     expect(result.success).toBe(false);
 
-    const validLongMessage = "a".repeat(500);
+    const validLongMessage = "a".repeat(4000);
     const validResult = RecommendRequestSchema.safeParse({ message: validLongMessage });
     expect(validResult.success).toBe(true);
   });

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BookOpen, ExternalLink, Star } from "lucide-react";
+import { ExternalLink, Star } from "lucide-react";
 import type { Book } from "@/lib/schemas";
 
 interface BookCardProps {
@@ -25,21 +25,17 @@ export function BookCard({ book, index }: BookCardProps) {
         hover:border-primary/30 transition-all duration-300"
     >
       <div className="flex gap-4 p-4">
-        {/* Book cover */}
-        <div className="flex-shrink-0 w-24 h-36 rounded-lg overflow-hidden bg-muted relative">
-          {book.coverUrl ? (
+        {/* Book cover (only rendered when an image exists) */}
+        {book.coverUrl && (
+          <div className="flex-shrink-0 w-24 h-36 rounded-lg overflow-hidden bg-muted relative shadow-sm">
             <img
               src={book.coverUrl}
               alt={`Cover of ${book.title}`}
               className="w-full h-full object-cover"
               loading="lazy"
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-              <BookOpen size={32} className="text-primary/40" />
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Book info */}
         <div className="flex-1 min-w-0">

@@ -28,15 +28,45 @@ export const PreferencesSchema = z.object({
   mood: z.array(z.string()).default([]),
   similarTo: z.array(z.string()).default([]),
   avoid: z.array(z.string()).default([]),
+  targetBookQuery: z.string().optional().describe("If the user is asking about a specific book or title (e.g. 'The Notebook'), extract the book title here"),
 });
 
 export type Preferences = z.infer<typeof PreferencesSchema>;
 
 /** Schema for the recommendation request body */
 export const RecommendRequestSchema = z.object({
-  message: z.string().min(1).max(500),
-  genre: z.enum(GENRES).optional(),
-  level: z.enum(LEVELS).optional(),
+  message: z
+    .string()
+    .trim()
+    .min(1, "Please enter a question or description of what you'd like to read.")
+    .max(4000, "Message is too long (maximum 4000 characters)."),
+  genre: z
+    .enum(GENRES)
+    .optional()
+    .nullable()
+    .or(z.literal(""))
+    .transform((val) => (val && typeof val === "string" && val.trim() ? (val as Genre) : undefined)),
+  level: z
+    .enum(LEVELS)
+    .optional()
+    .nullable()
+    .or(z.literal(""))
+    .transform((val) => (val && typeof val === "string" && val.trim() ? (val as Level) : undefined)),
+  email: z
+    .string()
+    .trim()
+    .email("Please provide a valid email address.")
+    .optional()
+    .nullable()
+    .or(z.literal(""))
+    .transform((val) => (val && typeof val === "string" && val.trim() ? val.trim().toLowerCase() : undefined)),
+  chatId: z
+    .string()
+    .uuid("Invalid chat identifier format.")
+    .optional()
+    .nullable()
+    .or(z.literal(""))
+    .transform((val) => (val && typeof val === "string" && val.trim() ? val.trim() : undefined)),
 });
 
 export type RecommendRequest = z.infer<typeof RecommendRequestSchema>;
@@ -76,5 +106,6 @@ export type StreamEvent =
   | { type: "books"; data: Book[] }
   | { type: "ladder"; data: LadderStep[] }
   | { type: "text"; data: string }
+  | { type: "chatId"; data: string }
   | { type: "error"; data: string }
   | { type: "done" };

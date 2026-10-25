@@ -48,6 +48,16 @@ export interface RateLimitResult {
  * Returns whether the request is allowed and when to retry.
  */
 export async function checkRateLimit(ip: string): Promise<RateLimitResult> {
+  // If Upstash credentials are not configured or are placeholders, fail open immediately
+  if (
+    !env.UPSTASH_REDIS_REST_URL ||
+    env.UPSTASH_REDIS_REST_URL.includes("placeholder") ||
+    !env.UPSTASH_REDIS_REST_TOKEN ||
+    env.UPSTASH_REDIS_REST_TOKEN.includes("placeholder")
+  ) {
+    return { allowed: true, remaining: 100 };
+  }
+
   try {
     const { minuteLimit, dailyLimit } = getRateLimiters();
 

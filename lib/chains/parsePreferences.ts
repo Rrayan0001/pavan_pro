@@ -22,6 +22,7 @@ Analyze the user's message and extract their preferences. Here are the rules:
 4. SIMILAR_TO: If they mention specific books or authors they liked, list them
 5. AVOID: If they mention things they don't want, list them
 6. MAX_PAGES: If they mention a page preference, extract it
+7. TARGET_BOOK_QUERY: If the user is inquiring or asking a question about a specific book (e.g. "is The Notebook good to start with...", "tell me about Dune"), extract the exact title of that book.
 
 Be generous with genre matching - "scary" maps to horror, "love story" maps to romance, etc.
 Always return at least one genre.`;

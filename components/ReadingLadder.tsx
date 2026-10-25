@@ -43,17 +43,13 @@ export function ReadingLadder({ steps }: ReadingLadderProps) {
 
               {/* Book info */}
               <div className="flex gap-2">
-                {step.book.coverUrl ? (
+                {step.book.coverUrl && (
                   <img
                     src={step.book.coverUrl}
                     alt={step.book.title}
-                    className="w-10 h-14 rounded object-cover flex-shrink-0"
+                    className="w-10 h-14 rounded object-cover flex-shrink-0 shadow-xs"
                     loading="lazy"
                   />
-                ) : (
-                  <div className="w-10 h-14 rounded bg-muted flex items-center justify-center flex-shrink-0">
-                    <BookOpen size={14} className="text-muted-foreground" />
-                  </div>
                 )}
                 <div className="min-w-0">
                   <p className="text-sm font-medium line-clamp-2 leading-tight">
