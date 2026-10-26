@@ -3,7 +3,13 @@ import { RecommendRequestSchema } from "@/lib/schemas";
 import { parsePreferences } from "@/lib/chains/parsePreferences";
 import { explainRecommendations } from "@/lib/chains/explainRecommendations";
 import { searchCatalog, getReadingLadder } from "@/lib/retrieval/catalog";
-import { scoreBookDetailed, type ScoringInput } from "@/lib/scoring/score";
+import {
+  scoreBookDetailed,
+  cosineSimilarity,
+  maximalMarginalRelevance,
+  type ScoringInput,
+} from "@/lib/scoring/score";
+import { getEmbeddingsModel } from "@/lib/llm";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { formatSSE } from "@/lib/utils";
 import { supabase } from "@/lib/db/supabase";
@@ -80,10 +86,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { message, genre, level, email, chatId } = parsed.data;
+    const { message, genre, level, email, chatId, excludeBookIds = [] } = parsed.data;
 
     // Stage 1: Raw request
-    debugStages.stage1_rawRequest = { message, genre, level, email, chatId };
+    debugStages.stage1_rawRequest = { message, genre, level, email, chatId, excludeBookIds };
     console.log("[STAGE 1: Raw Request]", debugStages.stage1_rawRequest);
 
     // Start SSE stream
@@ -139,42 +145,81 @@ export async function POST(request: NextRequest) {
             return;
           }
 
-          // Stage 5: Per-candidate score breakdown
-          const scoredBooks: Book[] = candidates
-            .map((book) => {
-              const input: ScoringInput = {
-                bookLevel: book.level,
-                bookGenres: book.genres,
-                bookPageCount: book.pageCount,
-                bookAvgRating: book.avgRating,
-                bookTone: book.tone,
-                semanticSimilarity: 0.5, // default when no vector search
-                targetLevel: preferences.level,
-                targetGenres: preferences.genres,
-                avoidList: preferences.avoid,
-              };
-              const breakdown = scoreBookDetailed(input);
-              let score = breakdown.total;
+          // Stage 5: Per-candidate score breakdown with real semantic similarity & MMR diversity
+          let queryEmbedding: number[] | null = null;
+          try {
+            const embeddings = getEmbeddingsModel();
+            const queryParts = [
+              message,
+              preferences.genres.join(" "),
+              (preferences.subGenres || []).join(" "),
+              (preferences.mood || []).join(" "),
+              (preferences.similarTo || []).join(" "),
+            ].filter(Boolean);
+            queryEmbedding = await embeddings.embedQuery(queryParts.join(" "));
+          } catch (embedErr) {
+            console.warn("[STAGE 5: Query embedding failed, using fallback similarity]", embedErr);
+          }
 
-              // If the user was asking specifically about this book title, prioritize it to the top!
-              if (
-                preferences.targetBookQuery &&
-                book.title.toLowerCase().includes(preferences.targetBookQuery.toLowerCase())
-              ) {
-                score = Math.max(score, 0.98);
-              }
+          const scoredCandidates: Book[] = candidates.map((book) => {
+            let semanticSimilarity = 0.5;
+            if (queryEmbedding && book.embedding && book.embedding.length > 0) {
+              semanticSimilarity = Math.max(0, cosineSimilarity(queryEmbedding, book.embedding));
+            } else if (preferences.mood.length > 0 || (preferences.subGenres && preferences.subGenres.length > 0)) {
+              // Heuristic when vector embedding not available
+              const matchesMood = (book.tone || []).some((t) =>
+                preferences.mood.concat(preferences.subGenres || []).some((m) =>
+                  t.toLowerCase().includes(m.toLowerCase())
+                )
+              );
+              semanticSimilarity = matchesMood ? 0.75 : 0.45;
+            }
 
-              debugStages.stage5_scoreBreakdown.push({
-                bookId: book.id,
-                title: book.title,
-                breakdown,
-                finalScore: score,
-              });
+            const isExcluded = excludeBookIds.includes(book.id);
+            const input: ScoringInput = {
+              bookLevel: book.level,
+              bookGenres: book.genres,
+              bookPageCount: book.pageCount,
+              bookAvgRating: book.avgRating,
+              bookTone: book.tone,
+              semanticSimilarity,
+              targetLevel: preferences.level,
+              targetGenres: preferences.genres,
+              avoidList: preferences.avoid,
+              targetSubGenres: preferences.subGenres,
+              targetMood: preferences.mood,
+              heatLevel: preferences.heatLevel,
+              isExcluded,
+            };
+            const breakdown = scoreBookDetailed(input);
+            let score = breakdown.total;
 
-              return { ...book, score };
-            })
+            // If the user was asking specifically about this book title, prioritize it to the top!
+            if (
+              preferences.targetBookQuery &&
+              book.title.toLowerCase().includes(preferences.targetBookQuery.toLowerCase())
+            ) {
+              score = Math.max(score, 0.98);
+            }
+
+            debugStages.stage5_scoreBreakdown.push({
+              bookId: book.id,
+              title: book.title,
+              breakdown,
+              finalScore: score,
+            });
+
+            return { ...book, score };
+          });
+
+          // Sort by score descending and take top 15 candidates
+          const topCandidates = [...scoredCandidates]
             .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-            .slice(0, 5);
+            .slice(0, 15);
+
+          // Apply MMR (lambda = 0.7) for diverse selection of 3-5 books
+          const targetCount = Math.min(5, Math.max(3, topCandidates.length));
+          const scoredBooks: Book[] = maximalMarginalRelevance(topCandidates, targetCount, 0.7);
 
           // Stage 6: Final list of book IDs
           debugStages.stage6_finalBookIds = scoredBooks.map((b) => b.id);

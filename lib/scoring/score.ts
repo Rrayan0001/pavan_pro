@@ -1,8 +1,8 @@
 /**
  * Deterministic Book Scoring
  *
- * score = 0.35*levelMatch + 0.25*genreMatch + 0.20*semanticSimilarity
- *       + 0.10*rating + 0.10*lengthFit
+ * score = 0.30*levelMatch + 0.20*genreMatch + 0.25*semanticSimilarity
+ *       + 0.10*toneAndSubGenreMatch + 0.10*rating + 0.05*lengthFit
  *
  * All scoring is done in code — NO LLM calls here.
  */
@@ -12,11 +12,12 @@ import { clamp } from "@/lib/utils";
 
 /** Scoring weights — single source of truth, easy to tune */
 export const SCORING_WEIGHTS = {
-  levelMatch: 0.35,
-  genreMatch: 0.25,
-  semanticSimilarity: 0.2,
-  rating: 0.1,
-  lengthFit: 0.1,
+  levelMatch: 0.30,
+  genreMatch: 0.20,
+  semanticSimilarity: 0.25,
+  toneAndSubGenreMatch: 0.10,
+  rating: 0.10,
+  lengthFit: 0.05,
 } as const;
 
 /** Penalty multiplier for books in the user's "avoid" list */
@@ -41,11 +42,19 @@ export interface ScoringInput {
   targetGenres: string[];
   /** Topics/keywords the user wants to avoid */
   avoidList: string[];
+  /** Target sub-genres (e.g. rom-com, slow-burn) */
+  targetSubGenres?: string[];
+  /** Target mood/atmosphere cues */
+  targetMood?: string[];
+  /** Heat level preference (clean, mild, steamy) */
+  heatLevel?: string | null;
+  /** Whether the book has already been seen in this session */
+  isExcluded?: boolean;
 }
 
 /**
  * Compute the level match score.
- * 1.0 = exact match, 0.5 = adjacent level, 0.0 = two levels apart
+ * 1.0 = exact match, 0.5 = adjacent level, 0.1 = two levels apart
  */
 export function scoreLevelMatch(bookLevel: Level, targetLevel: Level): number {
   if (bookLevel === targetLevel) return 1.0;
@@ -104,6 +113,49 @@ export function scoreRating(avgRating: number | null): number {
 }
 
 /**
+ * Compute match for tone, sub-genres, and heat level.
+ * Returns 1.0 if no specific cues were asked, or a score based on overlap.
+ */
+export function scoreToneAndSubGenreMatch(
+  bookTone: string[],
+  targetSubGenres: string[] = [],
+  targetMood: string[] = [],
+  heatLevel?: string | null
+): number {
+  const targets = [
+    ...targetSubGenres.map((s) => s.toLowerCase().trim()),
+    ...targetMood.map((m) => m.toLowerCase().trim()),
+  ];
+
+  const bookTonesLower = bookTone.map((t) => t.toLowerCase().trim());
+  let targetCount = targets.length;
+  let matches = 0;
+
+  for (const target of targets) {
+    if (bookTonesLower.some((bt) => bt.includes(target) || target.includes(bt))) {
+      matches++;
+    }
+  }
+
+  if (heatLevel && heatLevel !== "clean") {
+    targetCount++;
+    const heatKeywords = heatLevel === "steamy" ? ["steamy", "spicy", "smut", "erotic"] : [heatLevel.toLowerCase()];
+    if (bookTonesLower.some((bt) => heatKeywords.some((hk) => bt.includes(hk) || hk.includes(bt)))) {
+      matches++;
+    }
+  }
+
+  if (targetCount === 0) {
+    return 1.0; // neutral / full credit if user didn't specify tone/sub-genre constraints
+  }
+
+  if (matches > 0) {
+    return clamp(0.5 + 0.5 * (matches / targetCount), 0, 1);
+  }
+  return 0.3; // base score if no explicit match
+}
+
+/**
  * Check if a book matches any items in the avoid list.
  * Returns true if the book should be penalized.
  */
@@ -130,6 +182,7 @@ export interface ScoreBreakdown {
   levelMatch: number;
   genreMatch: number;
   semanticSimilarity: number;
+  toneAndSubGenreMatch: number;
   rating: number;
   lengthFit: number;
   total: number;
@@ -144,6 +197,12 @@ export function scoreBookDetailed(input: ScoringInput): ScoreBreakdown {
   const levelScore = scoreLevelMatch(input.bookLevel, input.targetLevel);
   const genreScore = scoreGenreMatch(input.bookGenres, input.targetGenres);
   const semanticScore = clamp(input.semanticSimilarity, 0, 1);
+  const toneScore = scoreToneAndSubGenreMatch(
+    input.bookTone,
+    input.targetSubGenres,
+    input.targetMood,
+    input.heatLevel
+  );
   const ratingScore = scoreRating(input.bookAvgRating);
   const lengthScore = scoreLengthFit(input.bookPageCount, input.targetLevel);
 
@@ -151,6 +210,7 @@ export function scoreBookDetailed(input: ScoringInput): ScoreBreakdown {
     w.levelMatch * levelScore +
     w.genreMatch * genreScore +
     w.semanticSimilarity * semanticScore +
+    w.toneAndSubGenreMatch * toneScore +
     w.rating * ratingScore +
     w.lengthFit * lengthScore;
 
@@ -165,10 +225,15 @@ export function scoreBookDetailed(input: ScoringInput): ScoreBreakdown {
     total *= AVOID_PENALTY;
   }
 
+  if (input.isExcluded) {
+    total = Math.max(0, total - 0.5);
+  }
+
   return {
     levelMatch: levelScore,
     genreMatch: genreScore,
     semanticSimilarity: semanticScore,
+    toneAndSubGenreMatch: toneScore,
     rating: ratingScore,
     lengthFit: lengthScore,
     total: clamp(total, 0, 1),
@@ -181,4 +246,98 @@ export function scoreBookDetailed(input: ScoringInput): ScoreBreakdown {
  */
 export function scoreBook(input: ScoringInput): number {
   return scoreBookDetailed(input).total;
+}
+
+/**
+ * Cosine similarity between two numerical vectors.
+ */
+export function cosineSimilarity(a: number[], b: number[]): number {
+  if (!a || !b || a.length === 0 || b.length === 0 || a.length !== b.length) return 0.5;
+  let dot = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
+  if (normA === 0 || normB === 0) return 0;
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+/**
+ * Pairwise similarity metric between two books for diversity ranking.
+ */
+export function computeItemSimilarity(
+  itemA: { id: string; author?: string; genres?: string[]; embedding?: number[] | null },
+  itemB: { id: string; author?: string; genres?: string[]; embedding?: number[] | null }
+): number {
+  if (itemA.id === itemB.id) return 1.0;
+  if (
+    itemA.embedding &&
+    itemB.embedding &&
+    itemA.embedding.length > 0 &&
+    itemA.embedding.length === itemB.embedding.length
+  ) {
+    return Math.max(0, cosineSimilarity(itemA.embedding, itemB.embedding));
+  }
+  if (itemA.author && itemB.author && itemA.author.toLowerCase() === itemB.author.toLowerCase()) {
+    return 0.85;
+  }
+  if (itemA.genres && itemB.genres && itemA.genres.length > 0 && itemB.genres.length > 0) {
+    const setB = new Set(itemB.genres.map((g) => g.toLowerCase()));
+    const common = itemA.genres.filter((g) => setB.has(g.toLowerCase())).length;
+    return common > 0 ? 0.4 : 0.1;
+  }
+  return 0.2;
+}
+
+/**
+ * Maximal Marginal Relevance (MMR) for selecting diverse, high-relevance recommendations.
+ * @param items Candidate items sorted or scored with `score`.
+ * @param k Number of diverse items to select.
+ * @param lambda Trade-off between relevance (1.0) and diversity (0.0). Default = 0.7.
+ */
+export function maximalMarginalRelevance<
+  T extends { id: string; score?: number; author?: string; genres?: string[]; embedding?: number[] | null }
+>(items: T[], k: number = 5, lambda: number = 0.7): T[] {
+  if (items.length <= k) return [...items];
+
+  const remaining = [...items];
+  const selected: T[] = [];
+
+  // Pick top-relevance candidate first
+  remaining.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+  const first = remaining.shift()!;
+  selected.push(first);
+
+  while (selected.length < k && remaining.length > 0) {
+    let bestIdx = -1;
+    let bestMmrScore = -Infinity;
+
+    for (let i = 0; i < remaining.length; i++) {
+      const cand = remaining[i];
+      const relevance = cand.score ?? 0;
+
+      let maxSim = 0;
+      for (const sel of selected) {
+        const sim = computeItemSimilarity(cand, sel);
+        if (sim > maxSim) maxSim = sim;
+      }
+
+      const mmrScore = lambda * relevance - (1 - lambda) * maxSim;
+      if (mmrScore > bestMmrScore) {
+        bestMmrScore = mmrScore;
+        bestIdx = i;
+      }
+    }
+
+    if (bestIdx >= 0) {
+      selected.push(remaining.splice(bestIdx, 1)[0]);
+    } else {
+      break;
+    }
+  }
+
+  return selected;
 }

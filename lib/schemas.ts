@@ -76,13 +76,17 @@ export const RecommendRequestSchema = z.object({
     .nullable()
     .or(z.literal(""))
     .transform((val) => (val && typeof val === "string" && val.trim() ? val.trim() : undefined)),
+  excludeBookIds: z
+    .array(z.string())
+    .optional()
+    .default([]),
 });
 
 export type RecommendRequest = z.infer<typeof RecommendRequestSchema>;
 
 /** A verified book with score, ready for the UI */
 export const BookSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   title: z.string(),
   author: z.string(),
   genres: z.array(z.string()),
@@ -97,6 +101,7 @@ export const BookSchema = z.object({
   whyStartHere: z.string().nullable(),
   score: z.number().optional(),
   amazonSearchUrl: z.string().url().optional(),
+  embedding: z.array(z.number()).nullable().optional(),
 });
 
 export type Book = z.infer<typeof BookSchema>;

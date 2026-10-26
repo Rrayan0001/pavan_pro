@@ -5,6 +5,9 @@ import {
   scoreLengthFit,
   scoreRating,
   matchesAvoidList,
+  scoreToneAndSubGenreMatch,
+  cosineSimilarity,
+  maximalMarginalRelevance,
   scoreBook,
   SCORING_WEIGHTS,
   type ScoringInput,
@@ -169,5 +172,61 @@ describe("scoreBook", () => {
   it("weights sum to 1.0", () => {
     const sum = Object.values(SCORING_WEIGHTS).reduce((a, b) => a + b, 0);
     expect(sum).toBeCloseTo(1.0);
+  });
+
+  it("penalizes previously seen books with isExcluded", () => {
+    const normal = scoreBook(baseInput);
+    const excluded = scoreBook({ ...baseInput, isExcluded: true });
+    expect(excluded).toBe(Math.max(0, normal - 0.5));
+  });
+});
+
+describe("scoreToneAndSubGenreMatch", () => {
+  it("returns 1.0 when no targets specified", () => {
+    expect(scoreToneAndSubGenreMatch(["romantic"])).toBe(1.0);
+  });
+
+  it("scores higher when tone or subgenre matches", () => {
+    const match = scoreToneAndSubGenreMatch(["spicy", "enemies-to-lovers"], ["enemies-to-lovers"]);
+    const noMatch = scoreToneAndSubGenreMatch(["sweet", "clean"], ["enemies-to-lovers"]);
+    expect(match).toBeGreaterThan(noMatch);
+  });
+
+  it("recognizes steamy / spicy heat levels", () => {
+    const match = scoreToneAndSubGenreMatch(["spicy", "sensual"], [], [], "steamy");
+    expect(match).toBe(1.0);
+  });
+});
+
+describe("cosineSimilarity", () => {
+  it("returns 1.0 for identical vectors", () => {
+    expect(cosineSimilarity([1, 0, 0], [1, 0, 0])).toBeCloseTo(1.0);
+  });
+
+  it("returns 0.0 for orthogonal vectors", () => {
+    expect(cosineSimilarity([1, 0], [0, 1])).toBeCloseTo(0.0);
+  });
+});
+
+describe("maximalMarginalRelevance", () => {
+  it("returns all items if count <= k", () => {
+    const items = [
+      { id: "1", score: 0.9 },
+      { id: "2", score: 0.8 },
+    ];
+    expect(maximalMarginalRelevance(items, 3)).toHaveLength(2);
+  });
+
+  it("diversifies candidates and does not blindly take top 2 identical items", () => {
+    const items = [
+      { id: "1", score: 0.95, author: "Author A", genres: ["romance"], embedding: [1, 0] },
+      { id: "2", score: 0.94, author: "Author A", genres: ["romance"], embedding: [0.99, 0.01] },
+      { id: "3", score: 0.88, author: "Author B", genres: ["rom-com"], embedding: [0, 1] },
+    ];
+    const picked = maximalMarginalRelevance(items, 2, 0.7);
+    expect(picked).toHaveLength(2);
+    expect(picked[0].id).toBe("1");
+    // Picked item 2 should be item 3 because item 2 has near 1.0 similarity with item 1
+    expect(picked[1].id).toBe("3");
   });
 });

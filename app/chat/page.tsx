@@ -236,12 +236,19 @@ function ChatAppContent() {
       let accumulatedText = "";
 
       try {
+        const seenBookIds = Array.from(
+          new Set(
+            messages.flatMap((m) => (m.books ? m.books.map((b) => b.id) : []))
+          )
+        );
+
         const payloadToSend = {
           message: payload.message.trim(),
           ...(payload.genre ? { genre: payload.genre } : {}),
           ...(payload.level ? { level: payload.level } : {}),
           ...(userEmail?.trim() ? { email: userEmail.trim().toLowerCase() } : {}),
           ...(activeChatId ? { chatId: activeChatId } : {}),
+          ...(seenBookIds.length > 0 ? { excludeBookIds: seenBookIds } : {}),
         };
 
         const response = await fetch("/api/recommend", {

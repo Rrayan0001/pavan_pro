@@ -410,5 +410,6 @@ function rowToBook(row: BookRow): Book {
     avgRating: row.avg_rating,
     whyStartHere: row.why_start_here,
     amazonSearchUrl: amazonSearchUrl(row.title, row.author),
+    embedding: row.embedding ?? null,
   };
 }
