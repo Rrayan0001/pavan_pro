@@ -84,7 +84,7 @@ export async function parsePreferences(
       rawResult = {
         genres: cleanGenreHint ? [cleanGenreHint as (typeof GENRES)[number]] : ["fiction" as any],
         subGenres: [],
-        level: null,
+        level: "beginner",
         heatLevel: null,
         maxPages: null,
         mood: [],

@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { RecommendRequestSchema } from "@/lib/schemas";
 import { parsePreferences } from "@/lib/chains/parsePreferences";
-import { explainRecommendations } from "@/lib/chains/explainRecommendations";
-import { searchCatalog, getReadingLadder } from "@/lib/retrieval/catalog";
+import { generateStructuredExplanation } from "@/lib/chains/explainRecommendations";
+import { searchCatalog, getDynamicReadingLadder } from "@/lib/retrieval/catalog";
 import {
   scoreBookDetailed,
   cosineSimilarity,
@@ -230,31 +230,16 @@ export async function POST(request: NextRequest) {
             controller.enqueue(encoder.encode(formatSSE("debug", debugStages)));
           }
 
-          // Send book cards
-          controller.enqueue(
-            encoder.encode(formatSSE("books", scoredBooks))
-          );
-
-          // [4] Get reading ladder
-          const primaryGenre = preferences.genres[0];
+          // [4] Get dynamic reading ladder (Task 6)
+          const primaryGenre = preferences.genres[0] || "fiction";
           let ladderSteps: { step: number; book: Book; note: string }[] = [];
-          if (primaryGenre) {
-            const ladder = await getReadingLadder(primaryGenre);
-            if (ladder.length > 0) {
-              ladderSteps = ladder.map((book, i) => ({
-                step: i + 1,
-                book,
-                note:
-                  i === 0
-                    ? "Start here"
-                    : i === ladder.length - 1
-                      ? "Ready for a challenge"
-                      : "Level up",
-              }));
-              controller.enqueue(
-                encoder.encode(formatSSE("ladder", ladderSteps))
-              );
+          try {
+            ladderSteps = await getDynamicReadingLadder(candidates, preferences.level, primaryGenre);
+            if (ladderSteps.length > 0) {
+              controller.enqueue(encoder.encode(formatSSE("ladder", ladderSteps)));
             }
+          } catch (ladderErr) {
+            console.warn("[STAGE 4: Dynamic ladder error]", ladderErr);
           }
 
           // Send honest notice banner (Task 2 & 5)
@@ -273,20 +258,39 @@ export async function POST(request: NextRequest) {
             controller.enqueue(encoder.encode(formatSSE("notice", fullNotice)));
           }
 
-          let fullExplanation = "";
-
-          // [5] Stream explanation
-          const explanationGen = explainRecommendations(
+          // [5] Generate structured explanations & stream clean prose (Task 5)
+          const structuredExplanation = await generateStructuredExplanation(
             scoredBooks,
             preferences,
-            message
+            message,
+            fullNotice
           );
 
-          for await (const chunk of explanationGen) {
+          // Enrich books with structured whyItFits & whyThisLevel
+          const explanationMap = new Map((structuredExplanation.books || []).map((eb) => [eb.bookId, eb]));
+          const enrichedBooks: Book[] = scoredBooks.map((b) => {
+            const eb = explanationMap.get(b.id);
+            if (eb) {
+              return {
+                ...b,
+                whyItFits: eb.whyItFits,
+                whyThisLevel: eb.whyThisLevel,
+                watchOut: eb.watchOut,
+              };
+            }
+            return b;
+          });
+
+          // Send book cards with rich structured explanations
+          controller.enqueue(encoder.encode(formatSSE("books", enrichedBooks)));
+
+          // Stream clean summary text without raw markdown asterisks
+          let fullExplanation = "";
+          const summaryWords = structuredExplanation.summary.split(" ");
+          for (let i = 0; i < summaryWords.length; i += 4) {
+            const chunk = summaryWords.slice(i, i + 4).join(" ") + (i + 4 < summaryWords.length ? " " : "");
             fullExplanation += chunk;
-            controller.enqueue(
-              encoder.encode(formatSSE("text", chunk))
-            );
+            controller.enqueue(encoder.encode(formatSSE("text", chunk)));
           }
 
           // Save chat session if user is logged in with an email

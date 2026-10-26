@@ -29,7 +29,7 @@ export type LevelSource = "message" | "ui" | "default";
 export const PreferencesSchema = z.object({
   genres: z.array(z.enum(GENRES)).min(1),
   subGenres: z.array(z.string()).default([]),
-  level: z.enum(LEVELS).nullable().default("beginner"),
+  level: z.enum(LEVELS).default("beginner"),
   heatLevel: z.enum(HEAT_LEVELS).nullable().optional(),
   maxPages: z.number().int().min(1).nullable().optional(),
   mood: z.array(z.string()).default([]),
@@ -102,6 +102,9 @@ export const BookSchema = z.object({
   score: z.number().optional(),
   amazonSearchUrl: z.string().url().optional(),
   embedding: z.array(z.number()).nullable().optional(),
+  whyItFits: z.string().optional(),
+  whyThisLevel: z.string().optional(),
+  watchOut: z.string().nullable().optional(),
 });
 
 export type Book = z.infer<typeof BookSchema>;
@@ -115,11 +118,34 @@ export const LadderStepSchema = z.object({
 
 export type LadderStep = z.infer<typeof LadderStepSchema>;
 
+/** Structured explanation for a specific book */
+export const BookExplanationSchema = z.object({
+  bookId: z.string(),
+  whyItFits: z.string(),
+  whyThisLevel: z.string(),
+  watchOut: z.string().nullable().optional(),
+});
+
+export type BookExplanation = z.infer<typeof BookExplanationSchema>;
+
+/** Structured full explanation response */
+export const ExplanationResponseSchema = z.object({
+  notice: z.string().nullable().optional(),
+  summary: z.string(),
+  books: z.array(BookExplanationSchema),
+  ladderNote: z.string().nullable().optional(),
+});
+
+export type ExplanationResponse = z.infer<typeof ExplanationResponseSchema>;
+
 /** API response event types for SSE streaming */
 export type StreamEvent =
   | { type: "books"; data: Book[] }
   | { type: "ladder"; data: LadderStep[] }
+  | { type: "notice"; data: string }
+  | { type: "explanation"; data: ExplanationResponse }
   | { type: "text"; data: string }
   | { type: "chatId"; data: string }
+  | { type: "debug"; data: unknown }
   | { type: "error"; data: string }
-  | { type: "done" };
+  | { type: "done"; data?: null };

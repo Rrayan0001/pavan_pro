@@ -241,7 +241,7 @@ Do NOT guess or invent plot facts not present in the description.`,
           complexity: t.complexity,
           pacing: t.pacing,
           tone: t.tone,
-          heatLevel: t.heatLevel,
+          heatLevel: t.heatLevel ?? "unknown",
         };
       }
       const pages = c.pageCount ?? 300;
@@ -371,7 +371,7 @@ async function vectorSearchBooks(
 }
 
 /**
- * Get reading ladder for a genre.
+ * Get reading ladder for a genre from the database.
  */
 export async function getReadingLadder(genre: string): Promise<Book[]> {
   const levels: Level[] = ["beginner", "intermediate", "advanced"];
@@ -392,6 +392,73 @@ export async function getReadingLadder(genre: string): Promise<Book[]> {
   }
 
   return ladder;
+}
+
+/**
+ * Construct a dynamic 3-step reading ladder from the candidate set and database:
+ * Step 1: User level match (Start here)
+ * Step 2: Complexity bump / intermediate progression (Level up)
+ * Step 3: Stretch pick (Ready for a challenge)
+ */
+export async function getDynamicReadingLadder(
+  candidates: Book[],
+  targetLevel: Level,
+  primaryGenre: string
+): Promise<{ step: number; book: Book; note: string }[]> {
+  const steps: { step: number; book: Book; note: string }[] = [];
+
+  let step1Level: Level = "beginner";
+  let step2Level: Level = "intermediate";
+  let step3Level: Level = "advanced";
+
+  if (targetLevel === "intermediate") {
+    step1Level = "intermediate";
+    step2Level = "intermediate";
+    step3Level = "advanced";
+  } else if (targetLevel === "advanced") {
+    step1Level = "intermediate";
+    step2Level = "advanced";
+    step3Level = "advanced";
+  }
+
+  // Look in current candidates pool first
+  const candStep1 = candidates.find((b) => b.level === step1Level);
+  const candStep2 = candidates.find(
+    (b) => b.id !== candStep1?.id && (b.level === step2Level || (candStep1 && b.complexity > candStep1.complexity))
+  );
+  const candStep3 = candidates.find(
+    (b) => b.id !== candStep1?.id && b.id !== candStep2?.id && b.level === step3Level
+  );
+
+  const dbLadder = await getReadingLadder(primaryGenre);
+
+  const book1 = candStep1 || dbLadder.find((b) => b.level === step1Level) || dbLadder[0];
+  const book2 = candStep2 || dbLadder.find((b) => b.id !== book1?.id && b.level === step2Level) || dbLadder[1] || dbLadder[0];
+  const book3 = candStep3 || dbLadder.find((b) => b.id !== book1?.id && b.id !== book2?.id && b.level === step3Level) || dbLadder[2] || dbLadder[1];
+
+  if (book1) {
+    steps.push({
+      step: 1,
+      book: book1,
+      note: targetLevel === "beginner" ? "Start here" : "Foundation step",
+    });
+  }
+  if (book2 && book2.id !== book1?.id) {
+    steps.push({
+      step: 2,
+      book: book2,
+      note: "Level up",
+    });
+  }
+  if (book3 && book3.id !== book1?.id && book3.id !== book2?.id) {
+    steps.push({
+      step: 3,
+      book: book3,
+      note: "Ready for a challenge",
+    });
+  }
+
+  return steps;
 }
 
 function rowToBook(row: BookRow): Book {
