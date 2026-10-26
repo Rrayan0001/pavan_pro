@@ -20,11 +20,18 @@ export type Genre = (typeof GENRES)[number];
 export const LEVELS = ["beginner", "intermediate", "advanced"] as const;
 export type Level = (typeof LEVELS)[number];
 
+export const HEAT_LEVELS = ["clean", "mild", "steamy"] as const;
+export type HeatLevel = (typeof HEAT_LEVELS)[number];
+
+export type LevelSource = "message" | "ui" | "default";
+
 /** Schema for parsed user preferences (LLM output) */
 export const PreferencesSchema = z.object({
   genres: z.array(z.enum(GENRES)).min(1),
-  level: z.enum(LEVELS).default("beginner"),
-  maxPages: z.number().int().min(1).optional(),
+  subGenres: z.array(z.string()).default([]),
+  level: z.enum(LEVELS).nullable().default("beginner"),
+  heatLevel: z.enum(HEAT_LEVELS).nullable().optional(),
+  maxPages: z.number().int().min(1).nullable().optional(),
   mood: z.array(z.string()).default([]),
   similarTo: z.array(z.string()).default([]),
   avoid: z.array(z.string()).default([]),
@@ -45,13 +52,15 @@ export const RecommendRequestSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal(""))
-    .transform((val) => (val && typeof val === "string" && val.trim() ? (val as Genre) : undefined)),
+    .or(z.literal("any"))
+    .transform((val) => (val && typeof val === "string" && val.trim() && val.trim().toLowerCase() !== "any" ? (val as Genre) : undefined)),
   level: z
     .enum(LEVELS)
     .optional()
     .nullable()
     .or(z.literal(""))
-    .transform((val) => (val && typeof val === "string" && val.trim() ? (val as Level) : undefined)),
+    .or(z.literal("any"))
+    .transform((val) => (val && typeof val === "string" && val.trim() && val.trim().toLowerCase() !== "any" ? (val as Level) : undefined)),
   email: z
     .string()
     .trim()

@@ -24,9 +24,9 @@ describe("scoreLevelMatch", () => {
     expect(scoreLevelMatch("advanced", "intermediate")).toBe(0.5);
   });
 
-  it("returns 0.0 for non-adjacent levels", () => {
-    expect(scoreLevelMatch("beginner", "advanced")).toBe(0.0);
-    expect(scoreLevelMatch("advanced", "beginner")).toBe(0.0);
+  it("returns 0.1 for non-adjacent levels", () => {
+    expect(scoreLevelMatch("beginner", "advanced")).toBe(0.1);
+    expect(scoreLevelMatch("advanced", "beginner")).toBe(0.1);
   });
 });
 

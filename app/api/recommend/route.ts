@@ -102,11 +102,11 @@ export async function POST(request: NextRequest) {
             throw pErr;
           }
 
-          const { preferences, inferredLevel } = parsedPrefResult;
+          const { preferences, levelSource, notice } = parsedPrefResult;
           debugStages.stage2_parsedPreferences = {
             preferences,
             parseSucceeded: parseSuccess,
-            inferredLevel,
+            levelSource,
           };
           debugStages.stage3_finalMergedPreferences = { ...preferences };
           console.log("[STAGE 2: Parsed Preferences]", debugStages.stage2_parsedPreferences);
@@ -212,15 +212,23 @@ export async function POST(request: NextRequest) {
             }
           }
 
-          // Send inferred level notice
-          let fullExplanation = "";
-          if (inferredLevel) {
-            const notice = `*I noticed you didn't specify a reading level, so I've started with **${preferences.level}** recommendations. You can adjust this anytime!*\n\n`;
-            fullExplanation += notice;
-            controller.enqueue(
-              encoder.encode(formatSSE("text", notice))
+          // Send honest notice banner (Task 2 & 5)
+          let fullNotice: string | null = notice;
+          if (preferences.heatLevel === "steamy") {
+            const hasSteamy = scoredBooks.some(
+              (b) => (b.tone || []).includes("steamy") || (b.tone || []).includes("spicy")
             );
+            if (!hasSteamy) {
+              const steamyNote = "No steamy books found in the current selection, showing the closest romance matches.";
+              fullNotice = fullNotice ? `${fullNotice} ${steamyNote}` : steamyNote;
+            }
           }
+
+          if (fullNotice) {
+            controller.enqueue(encoder.encode(formatSSE("notice", fullNotice)));
+          }
+
+          let fullExplanation = "";
 
           // [5] Stream explanation
           const explanationGen = explainRecommendations(

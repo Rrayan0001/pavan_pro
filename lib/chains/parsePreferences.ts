@@ -4,104 +4,156 @@ import { getChatModel } from "@/lib/llm";
 import {
   PreferencesSchema,
   type Preferences,
+  type LevelSource,
+  type Level,
   GENRES,
   LEVELS,
+  HEAT_LEVELS,
 } from "@/lib/schemas";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 
-const SYSTEM_PROMPT = `You are a book recommendation assistant. Your job is to understand what kind of book the user is looking for.
+const SYSTEM_PROMPT = `You are an expert literary librarian and book search parser.
+Your task is to analyze the user's message and extract structured reading preferences according to strict rules.
 
-Analyze the user's message and extract their preferences. Here are the rules:
-
-1. GENRES: Choose from exactly these genres: ${GENRES.join(", ")}
-2. LEVEL: Choose from: ${LEVELS.join(", ")}
-   - If the user says things like "new to reading", "never read much", "easy read" → beginner
-   - If no level cues are given, default to beginner
-   - "looking for a challenge", "deep", "literary" → advanced
-3. MOOD: Extract mood/atmosphere preferences (e.g., "dark", "lighthearted", "thought-provoking")
-4. SIMILAR_TO: If they mention specific books or authors they liked, list them
-5. AVOID: If they mention things they don't want, list them
-6. MAX_PAGES: If they mention a page preference, extract it
-7. TARGET_BOOK_QUERY: If the user is inquiring or asking a question about a specific book (e.g. "is The Notebook good to start with...", "tell me about Dune"), extract the exact title of that book.
-
-Be generous with genre matching - "scary" maps to horror, "love story" maps to romance, etc.
-Always return at least one genre.`;
+Rules:
+1. GENRES: Choose one or more from: ${GENRES.join(", ")}. Always return at least one genre.
+   - "love story", "romance", "dating" -> romance
+   - "suspense", "whodunit", "detective" -> mystery or thriller
+   - "magic", "dragons", "sword" -> fantasy
+   - "aliens", "space", "future", "AI" -> sci-fi
+2. SUB_GENRES: Extract niche sub-genres or tropes (e.g. "rom-com", "enemies-to-lovers", "slow-burn", "space opera", "cyberpunk", "psychological thriller", "cozy mystery").
+3. LEVEL: Choose from: ${LEVELS.join(", ")} ONLY if the text explicitly asks for a reading level.
+   - If the user explicitly mentions "beginner", "easy read", "for beginner", "getting started", "introductory", "simple" -> beginner
+   - "intermediate", "standard read", "moderate" -> intermediate
+   - "advanced", "challenging", "dense", "literary masterpiece", "deep read" -> advanced
+   - If the text DOES NOT explicitly state a difficulty level, return null.
+4. HEAT_LEVEL: For romance queries, choose from: ${HEAT_LEVELS.join(", ")} or null.
+   - "spicy", "steamy", "smut", "erotic", "high heat" -> steamy
+   - "mild", "sensual", "warm" -> mild
+   - "clean", "wholesome", "sweet", "fade to black", "no spice" -> clean
+   - Otherwise -> null
+5. MOOD: Array of descriptive mood words (e.g. ["dark", "witty", "heartwarming", "gripping"]).
+6. SIMILAR_TO: Array of author names or book titles mentioned as positive references.
+7. AVOID: Array of tropes, genres, or themes the user explicitly wishes to avoid.
+8. MAX_PAGES: Integer page limit if mentioned, else null.
+9. TARGET_BOOK_QUERY: If the user is asking about a specific book title (e.g. "is The Notebook good?", "thoughts on Dune"), extract that title.`;
 
 const prompt = ChatPromptTemplate.fromMessages([
   ["system", SYSTEM_PROMPT],
   ["human", "{message}"],
 ]);
 
+export interface ParsedPreferencesResult {
+  preferences: Preferences;
+  levelSource: LevelSource;
+  notice: string | null;
+}
+
 /**
- * Parse natural language into structured preferences.
- * Uses Gemini with structured output (Zod schema).
- * Retries once on validation failure, then returns a safe default.
+ * Parse natural language into structured preferences with strict precedence:
+ * 1. Explicit cues in message text (highest)
+ * 2. UI filter chips
+ * 3. Default (level = beginner)
  */
 export async function parsePreferences(
   message: string,
   genreHint?: string,
   levelHint?: string
-): Promise<{ preferences: Preferences; inferredLevel: boolean }> {
-  const model = getChatModel({ maxOutputTokens: 512, temperature: 0.1 });
-
-  // Use withStructuredOutput for reliable JSON
+): Promise<ParsedPreferencesResult> {
+  const model = getChatModel({ maxOutputTokens: 1024, temperature: 0.1 });
   const structuredModel = model.withStructuredOutput(PreferencesSchema);
 
-  const enrichedMessage = buildEnrichedMessage(message, genreHint, levelHint);
+  // Normalize UI hints ("any" string mapped to undefined)
+  const cleanGenreHint =
+    genreHint && genreHint.trim().toLowerCase() !== "any" ? genreHint.trim().toLowerCase() : undefined;
+  const cleanLevelHint =
+    levelHint && levelHint.trim().toLowerCase() !== "any" ? (levelHint.trim().toLowerCase() as Level) : undefined;
 
-  const inferredLevel =
-    !levelHint &&
-    !message
-      .toLowerCase()
-      .match(
-        /beginner|intermediate|advanced|new to reading|first.?time|challenge|literary|deep read/
-      );
+  let rawResult: Preferences;
 
   try {
-    const rawResult = await prompt.pipe(structuredModel).invoke({
-      message: enrichedMessage,
-    });
-    const result = PreferencesSchema.parse(rawResult);
-
-    return { preferences: result, inferredLevel: !!inferredLevel };
+    const output = await prompt.pipe(structuredModel).invoke({ message });
+    rawResult = PreferencesSchema.parse(output);
   } catch (firstError) {
-    // Retry once
-    console.warn("First preference parse failed, retrying:", firstError);
+    console.warn("[STAGE 2: Preference parse retry]:", firstError);
     try {
-      const rawResult = await prompt.pipe(structuredModel).invoke({
-        message: enrichedMessage,
-      });
-      const result = PreferencesSchema.parse(rawResult);
-      return { preferences: result, inferredLevel: !!inferredLevel };
+      const output = await prompt.pipe(structuredModel).invoke({ message });
+      rawResult = PreferencesSchema.parse(output);
     } catch (secondError) {
-      console.error("Preference parsing failed twice:", secondError);
-      // Return safe defaults
-      return {
-        preferences: {
-          genres: genreHint
-            ? [genreHint as (typeof GENRES)[number]]
-            : ["fantasy"],
-          level:
-            (levelHint as "beginner" | "intermediate" | "advanced") ??
-            "beginner",
-          maxPages: undefined,
-          mood: [],
-          similarTo: [],
-          avoid: [],
-        },
-        inferredLevel: true,
+      console.error("[STAGE 2: Preference parse failed twice, using defaults]:", secondError);
+      rawResult = {
+        genres: cleanGenreHint ? [cleanGenreHint as (typeof GENRES)[number]] : ["fiction" as any],
+        subGenres: [],
+        level: null,
+        heatLevel: null,
+        maxPages: null,
+        mood: [],
+        similarTo: [],
+        avoid: [],
       };
     }
   }
-}
 
-function buildEnrichedMessage(
-  message: string,
-  genreHint?: string,
-  levelHint?: string
-): string {
-  let enriched = message;
-  if (genreHint) enriched += `\n[User selected genre: ${genreHint}]`;
-  if (levelHint) enriched += `\n[User selected level: ${levelHint}]`;
-  return enriched;
+  // Detect explicit level cues in message text
+  const lowerMsg = message.toLowerCase();
+  const textHasBeginner = /\b(beginner|for beginner|beginners|easy read|new to reading|first.?time|starter|introductory)\b/.test(lowerMsg);
+  const textHasIntermediate = /\b(intermediate|moderate)\b/.test(lowerMsg);
+  const textHasAdvanced = /\b(advanced|challenge|challenging|literary|deep read|dense|masterwork)\b/.test(lowerMsg);
+
+  let finalLevel: Level;
+  let levelSource: LevelSource;
+
+  if (textHasBeginner) {
+    finalLevel = "beginner";
+    levelSource = "message";
+  } else if (textHasAdvanced) {
+    finalLevel = "advanced";
+    levelSource = "message";
+  } else if (textHasIntermediate) {
+    finalLevel = "intermediate";
+    levelSource = "message";
+  } else if (rawResult.level) {
+    finalLevel = rawResult.level;
+    levelSource = "message";
+  } else if (cleanLevelHint && LEVELS.includes(cleanLevelHint)) {
+    finalLevel = cleanLevelHint;
+    levelSource = "ui";
+  } else {
+    finalLevel = "beginner";
+    levelSource = "default";
+  }
+
+  // Genre Precedence:
+  // If user passed a clean UI genre hint and message didn't specify an explicit conflicting genre, prioritize UI
+  let finalGenres = rawResult.genres;
+  if (cleanGenreHint && GENRES.includes(cleanGenreHint as any)) {
+    if (!finalGenres.includes(cleanGenreHint as any)) {
+      finalGenres = [cleanGenreHint as any, ...finalGenres];
+    }
+  }
+
+  // Handle "spicy" sub-genre extraction explicitly
+  let finalHeatLevel = rawResult.heatLevel;
+  if (!finalHeatLevel && (lowerMsg.includes("spicy") || lowerMsg.includes("smut") || lowerMsg.includes("steamy"))) {
+    finalHeatLevel = "steamy";
+  }
+
+  const finalPreferences: Preferences = {
+    ...rawResult,
+    genres: finalGenres.length > 0 ? finalGenres : ["fiction" as any],
+    level: finalLevel,
+    heatLevel: finalHeatLevel,
+  };
+
+  // Generate plain notice message (no raw markdown asterisks!)
+  let notice: string | null = null;
+  if (levelSource === "default") {
+    notice = "I noticed you didn't specify a reading level, so I've started with beginner recommendations. You can adjust this anytime!";
+  }
+
+  return {
+    preferences: finalPreferences,
+    levelSource,
+    notice,
+  };
 }
