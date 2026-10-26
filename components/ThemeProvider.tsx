@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 
 interface ThemeContextType {
   theme: "light" | "dark";
@@ -8,7 +9,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "light",
+  theme: "dark",
   setTheme: () => {},
 });
 
@@ -23,30 +24,57 @@ function subscribe(callback: () => void) {
 }
 
 function getSnapshot(): "light" | "dark" {
+  if (typeof window === "undefined") return "dark";
   const stored = localStorage.getItem("bookcompass-theme") as
     | "light"
     | "dark"
     | null;
   if (stored) return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return "dark";
 }
 
 function getServerSnapshot(): "light" | "dark" {
-  return "light";
+  return "dark";
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
+    // Theme switching is EXCLUSIVELY for the chatbot page (/chat).
+    // The landing page (/) and login page (/login) are PERMANENTLY locked to dark mode.
+    const isChatPage = pathname?.startsWith("/chat");
+    if (isChatPage) {
+      if (theme === "light") {
+        document.documentElement.classList.remove("dark");
+        document.documentElement.classList.add("light");
+      } else {
+        document.documentElement.classList.add("dark");
+        document.documentElement.classList.remove("light");
+      }
+    } else {
+      // Landing page and login page are always strictly dark
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
+    }
+  }, [theme, pathname]);
 
   const setTheme = (next: "light" | "dark") => {
     localStorage.setItem("bookcompass-theme", next);
-    document.documentElement.classList.toggle("dark", next === "dark");
+    const isChatPage = typeof window !== "undefined" && window.location.pathname.startsWith("/chat");
+    if (isChatPage) {
+      if (next === "light") {
+        document.documentElement.classList.remove("dark");
+        document.documentElement.classList.add("light");
+      } else {
+        document.documentElement.classList.add("dark");
+        document.documentElement.classList.remove("light");
+      }
+    } else {
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
+    }
     window.dispatchEvent(new Event("storage"));
   };
 
@@ -72,8 +100,9 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="rounded-md p-2 hover:bg-muted transition-colors cursor-pointer"
+      className="rounded-md p-2 hover:bg-muted transition-colors cursor-pointer text-foreground"
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
     >
       {theme === "light" ? (
         <svg

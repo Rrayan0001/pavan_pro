@@ -41,5 +41,9 @@ export default function LandingPage() {
     window.dispatchEvent(new Event("bookcompass_auth_change"));
   };
 
-  return <Asme userEmail={userEmail} onLogout={handleLogout} />;
+  return (
+    <div className="dark min-h-screen bg-black text-white selection:bg-white/20">
+      <Asme userEmail={userEmail} onLogout={handleLogout} />
+    </div>
+  );
 }

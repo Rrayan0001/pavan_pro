@@ -23,10 +23,10 @@ export const Asme = ({ userEmail, onLogout }: AsmeLandingProps) => {
     <MotionConfig reducedMotion="user">
       <main
         className={cn(
-          'asme',
+          'asme dark',
           inter.variable,
           instrumentSerif.variable,
-          'relative min-h-svh bg-background [font-family:var(--font-asme-sans),ui-sans-serif,sans-serif] text-foreground antialiased',
+          'relative min-h-svh bg-black [font-family:var(--font-asme-sans),ui-sans-serif,sans-serif] text-white antialiased',
         )}
       >
         <AsmeStyles />
