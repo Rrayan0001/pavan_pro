@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ArrowRight, BookOpen } from "lucide-react";
+import { BookCover } from "@/components/BookCover";
 import type { LadderStep } from "@/lib/schemas";
 
 interface ReadingLadderProps {
@@ -43,14 +44,13 @@ export function ReadingLadder({ steps }: ReadingLadderProps) {
 
               {/* Book info */}
               <div className="flex gap-2">
-                {step.book.coverUrl && (
-                  <img
-                    src={step.book.coverUrl}
-                    alt={step.book.title}
-                    className="w-10 h-14 rounded object-cover flex-shrink-0 shadow-xs"
-                    loading="lazy"
-                  />
-                )}
+                <BookCover
+                  coverUrl={step.book.coverUrl}
+                  title={step.book.title}
+                  author={step.book.author}
+                  genre={step.book.genres[0]}
+                  size="sm"
+                />
                 <div className="min-w-0">
                   <p className="text-sm font-medium line-clamp-2 leading-tight">
                     {step.book.title}
