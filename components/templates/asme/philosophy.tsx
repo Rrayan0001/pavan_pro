@@ -6,7 +6,7 @@ import { Layers } from 'lucide-react';
 
 import { reveal, Serif } from './primitives';
 
-const PHILOSOPHY_VIDEO_URL = '/media/templates/asme/philosophy.mp4';
+const PHILOSOPHY_VIDEO_URL = '/philosophy.mp4';
 
 const TEXT_BLOCKS = [
   {

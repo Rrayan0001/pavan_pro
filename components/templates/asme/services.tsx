@@ -13,7 +13,7 @@ const SERVICES = [
     description:
       'Combines vector embeddings with pgvector cosine distance and deterministic keyword indexing to discover exact matches.',
     icon: Search,
-    videoUrl: '/media/templates/asme/services-research.mp4',
+    videoUrl: '/services-research.mp4',
   },
   {
     tag: 'Verification',
@@ -21,7 +21,7 @@ const SERVICES = [
     description:
       'Live validation cross-referenced with Google Books API ensures real authors, legitimate ISBNs, and authentic cover artwork.',
     icon: Database,
-    videoUrl: '/media/templates/asme/services-design.mp4',
+    videoUrl: '/services-design.mp4',
   },
   {
     tag: 'Continuity',
@@ -29,7 +29,7 @@ const SERVICES = [
     description:
       'Converse naturally across turns. Refine suggestions, ask follow-up questions, change reading levels, and save past threads.',
     icon: MessageSquare,
-    videoUrl: '/media/templates/asme/services-chat.mp4',
+    videoUrl: '/services-research.mp4',
   },
   {
     tag: 'Ladders',
@@ -37,7 +37,7 @@ const SERVICES = [
     description:
       'Explore ordered 3-stage reading journeys from accessible entrypoints to comprehensive masterclass literature.',
     icon: BookmarkCheck,
-    videoUrl: '/media/templates/asme/services-ladder.mp4',
+    videoUrl: '/services-design.mp4',
   },
 ];
 

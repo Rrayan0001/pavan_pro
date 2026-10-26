@@ -6,7 +6,7 @@ import { Sparkles, BookOpen } from 'lucide-react';
 
 import { reveal } from './primitives';
 
-const FEATURED_VIDEO_URL = '/media/templates/asme/featured.mp4';
+const FEATURED_VIDEO_URL = '/featured.mp4';
 
 export const FeaturedVideo = () => {
   const [videoFailed, setVideoFailed] = React.useState(false);

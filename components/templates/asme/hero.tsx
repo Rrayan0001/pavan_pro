@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, Sparkles, Search } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
 
@@ -8,7 +9,7 @@ import { Navbar } from './navbar';
 import { InstagramIcon, TwitterIcon } from './primitives';
 import type { Genre, Level } from '@/lib/schemas';
 
-const HERO_VIDEO_URL = '/media/templates/asme/hero.mp4';
+const HERO_VIDEO_URL = '/hero.mp4';
 const FADE_MS = 500;
 const FADE_OUT_LEAD_S = 0.55;
 const RESTART_DELAY_MS = 100;
@@ -47,28 +48,17 @@ const LEVELS: { value: Level; label: string }[] = [
 interface HeroProps {
   videoSrc?: string;
   posterSrc?: string;
-  onSubmitPrompt: (payload: { message: string; genre?: Genre; level?: Level }) => void;
-  isLoading?: boolean;
-  onToggleSidebar?: () => void;
-  isSidebarOpen?: boolean;
   userEmail?: string | null;
-  onOpenAuth?: () => void;
   onLogout?: () => void;
-  chatCount?: number;
 }
 
 export const Hero = ({
   videoSrc = HERO_VIDEO_URL,
   posterSrc,
-  onSubmitPrompt,
-  isLoading = false,
-  onToggleSidebar,
-  isSidebarOpen,
   userEmail,
-  onOpenAuth,
   onLogout,
-  chatCount = 0,
 }: HeroProps) => {
+  const router = useRouter();
   const reduced = useReducedMotion();
   const restartTimerRef = React.useRef<number | null>(null);
   const [isVisible, setIsVisible] = React.useState(false);
@@ -90,24 +80,22 @@ export const Hero = ({
     };
   }, []);
 
+  const navigateToChat = (query: string, genre?: Genre, level?: Level) => {
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (genre) params.set('genre', genre);
+    if (level) params.set('level', level);
+    router.push(`/chat?${params.toString()}`);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputMessage.trim() || isLoading) return;
-    onSubmitPrompt({
-      message: inputMessage.trim(),
-      genre: selectedGenre,
-      level: selectedLevel,
-    });
+    if (!inputMessage.trim()) return;
+    navigateToChat(inputMessage.trim(), selectedGenre, selectedLevel);
   };
 
   const handleQuickPrompt = (item: typeof QUICK_PROMPTS[0]) => {
-    setInputMessage(item.query);
-    setSelectedGenre(item.genre);
-    onSubmitPrompt({
-      message: item.query,
-      genre: item.genre,
-      level: selectedLevel,
-    });
+    navigateToChat(item.query, item.genre, selectedLevel);
   };
 
   return (
@@ -167,14 +155,7 @@ export const Hero = ({
       )}
 
       {/* Floating Navbar */}
-      <Navbar
-        onToggleSidebar={onToggleSidebar}
-        isSidebarOpen={isSidebarOpen}
-        userEmail={userEmail}
-        onOpenAuth={onOpenAuth}
-        onLogout={onLogout}
-        chatCount={chatCount}
-      />
+      <Navbar userEmail={userEmail} onLogout={onLogout} />
 
       {/* Hero Centerpiece */}
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 sm:px-6 py-10 md:py-16 text-center">
@@ -228,19 +209,14 @@ export const Hero = ({
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="Ask anything... e.g. 'thought-provoking sci-fi dealing with AI consciousness'"
                 className="min-w-0 flex-1 bg-transparent text-sm sm:text-base text-foreground outline-none placeholder:text-foreground/40"
-                disabled={isLoading}
               />
               <button
                 type="submit"
-                disabled={!inputMessage.trim() || isLoading}
+                disabled={!inputMessage.trim()}
                 aria-label="Find books"
                 className="liquid-glass inline-flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition-transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 cursor-pointer shadow-md"
               >
-                {isLoading ? (
-                  <div className="size-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                ) : (
-                  <ArrowRight size={18} className="rtl:rotate-180" />
-                )}
+                <ArrowRight size={18} className="rtl:rotate-180" />
               </button>
             </div>
 
@@ -267,7 +243,7 @@ export const Hero = ({
               </div>
 
               <span className="hidden sm:inline-block text-[11px] text-foreground/40 font-mono">
-                Press Enter ↵ to explore
+                Press Enter ↵ to launch chat
               </span>
             </div>
 
@@ -347,8 +323,7 @@ export const Hero = ({
                 key={p.label}
                 type="button"
                 onClick={() => handleQuickPrompt(p)}
-                disabled={isLoading}
-                className="liquid-glass rounded-full px-3 py-1 text-xs font-medium text-foreground/80 transition-all hover:bg-foreground/10 hover:text-foreground cursor-pointer disabled:opacity-50"
+                className="liquid-glass rounded-full px-3 py-1 text-xs font-medium text-foreground/80 transition-all hover:bg-foreground/10 hover:text-foreground cursor-pointer"
               >
                 {p.label}
               </button>
