@@ -1,10 +1,11 @@
 import "server-only";
 
 import { supabase, type BookRow } from "@/lib/db/supabase";
-import { getEmbeddingsModel } from "@/lib/llm";
+import { getEmbeddingsModel, getChatModel } from "@/lib/llm";
 import { searchGoogleBooks } from "@/lib/retrieval/googleBooks";
 import type { Preferences, Book, Level } from "@/lib/schemas";
 import { amazonSearchUrl } from "@/lib/utils";
+import { z } from "zod";
 
 export interface RetrievalStats {
   sqlCount: number;
@@ -14,20 +15,46 @@ export interface RetrievalStats {
   errors: string[];
 }
 
+const BatchTaggingSchema = z.object({
+  tags: z.array(
+    z.object({
+      index: z.number(),
+      level: z.enum(["beginner", "intermediate", "advanced"]),
+      complexity: z.number().int().min(1).max(5),
+      pacing: z.enum(["slow", "medium", "fast"]),
+      tone: z.array(z.string()),
+      heatLevel: z.enum(["clean", "mild", "steamy", "unknown"]).default("unknown"),
+    })
+  ),
+});
+
 /**
  * Search the curated book catalog using SQL filters + vector similarity,
- * augmented with live Google Books API results for queries with specific moods/subgenres.
+ * augmented with live Google Books API results when candidates < 8.
  * Returns books sorted by relevance.
  */
 export async function searchCatalog(
   preferences: Preferences,
-  limit: number = 10,
+  limit: number = 15,
   rawUserMessage?: string,
   statsCollector?: RetrievalStats
 ): Promise<Book[]> {
   const results: Book[] = [];
+  const seenIds = new Set<string>();
+  const seenTitleAuthors = new Set<string>();
 
-  // Step 0: If user asked about a specific book title, look for exact or ilike title match first!
+  const trackBook = (b: Book): boolean => {
+    const norm = `${b.title.toLowerCase().trim()}|${b.author.toLowerCase().trim()}`;
+    if (seenIds.has(b.id) || seenTitleAuthors.has(norm)) {
+      return false;
+    }
+    seenIds.add(b.id);
+    seenTitleAuthors.add(norm);
+    results.push(b);
+    return true;
+  };
+
+  // Step 0: If user asked about a specific book title, look for exact or ilike title match first
   if (preferences.targetBookQuery) {
     try {
       const { data: titleMatches, error: titleErr } = await supabase
@@ -41,127 +68,112 @@ export async function searchCatalog(
       }
 
       if (titleMatches && titleMatches.length > 0) {
-        results.push(...titleMatches.map(rowToBook));
+        for (const row of titleMatches) {
+          trackBook(rowToBook(row));
+        }
       }
     } catch (err: unknown) {
       if (statsCollector) statsCollector.errors.push(`[STAGE 4: Title search exception]: ${String(err)}`);
     }
   }
 
-  // Step 1: SQL filter for exact genre + level matches
+  // Step 1: SQL filter - FILTER BY GENRE ONLY (soft filtering: level is handled in scoring)
   let sqlBooks: Book[] = [];
   try {
-    sqlBooks = await sqlFilterBooks(preferences, limit);
+    sqlBooks = await sqlFilterBooks(preferences, 25);
   } catch (err: unknown) {
     if (statsCollector) statsCollector.errors.push(`[STAGE 4: SQL filter exception]: ${String(err)}`);
   }
   if (statsCollector) statsCollector.sqlCount = sqlBooks.length;
 
-  const existingIds = new Set(results.map((b) => b.id));
   for (const b of sqlBooks) {
-    if (!existingIds.has(b.id)) {
-      results.push(b);
-      existingIds.add(b.id);
-    }
+    trackBook(b);
   }
 
   // Step 2: Vector similarity search if we have mood/similarTo cues
   if (preferences.mood.length > 0 || preferences.similarTo.length > 0 || preferences.targetBookQuery) {
     let vectorBooks: Book[] = [];
     try {
-      vectorBooks = await vectorSearchBooks(preferences, limit);
+      vectorBooks = await vectorSearchBooks(preferences, 15);
     } catch (err: unknown) {
       if (statsCollector) statsCollector.errors.push(`[STAGE 4: Vector search exception]: ${String(err)}`);
     }
     if (statsCollector) statsCollector.vectorCount = vectorBooks.length;
 
     for (const book of vectorBooks) {
-      if (!existingIds.has(book.id)) {
-        results.push(book);
-        existingIds.add(book.id);
-      }
+      trackBook(book);
     }
   }
 
-  // Step 3: Live Google Books API search
+  // Step 3: Google Books fallback
+  // Triggered when candidates after genre filtering are fewer than 8, or user has specific keywords/mood
   let gbCount = 0;
-  try {
-    const isSpecificQuery =
-      preferences.mood.length > 0 ||
-      preferences.similarTo.length > 0 ||
-      preferences.genres.length > 1 ||
-      (rawUserMessage && rawUserMessage.trim().split(" ").length > 2);
+  const isSpecificNiche =
+    preferences.mood.length > 0 ||
+    preferences.similarTo.length > 0 ||
+    (rawUserMessage && (rawUserMessage.toLowerCase().includes("spicy") || rawUserMessage.toLowerCase().includes("rom-com")));
 
-    if (results.length < limit || isSpecificQuery) {
-      const searchTerms: string[] = [];
+  if (results.length < 8 || isSpecificNiche) {
+    try {
+      const primaryGenre = preferences.genres[0] || "fiction";
+      const searchTerms: string[] = [`subject:${primaryGenre}`];
 
-      if (rawUserMessage && rawUserMessage.trim().length <= 60) {
-        searchTerms.push(rawUserMessage.trim());
-      } else {
-        if (preferences.genres.length > 0) {
-          searchTerms.push(preferences.genres.join(" "));
-        }
-        if (preferences.mood.length > 0) {
-          searchTerms.push(preferences.mood.slice(0, 2).join(" "));
-        }
-        if (preferences.similarTo.length > 0) {
-          searchTerms.push(preferences.similarTo.slice(0, 2).join(" "));
-        }
+      if (preferences.mood.length > 0) {
+        searchTerms.push(preferences.mood.slice(0, 2).join(" "));
+      }
+      if (rawUserMessage && rawUserMessage.toLowerCase().includes("spicy")) {
+        searchTerms.push("spicy");
+      }
+      if (rawUserMessage && rawUserMessage.toLowerCase().includes("rom-com")) {
+        searchTerms.push("romantic comedy");
       }
 
       const queryString = searchTerms.join(" ").trim();
-      if (queryString) {
-        const apiCandidates = await searchGoogleBooks(queryString, 8);
-        gbCount = apiCandidates.length;
-        for (const apiBook of apiCandidates) {
-          if (!apiBook.title || !apiBook.author) continue;
+      const apiCandidates = await searchGoogleBooks(queryString, 20);
+      gbCount = apiCandidates.length;
 
-          // Avoid duplicates
-          const titleLower = apiBook.title.toLowerCase();
-          if (
-            results.some(
-              (r) =>
-                r.title.toLowerCase() === titleLower ||
-                r.title.toLowerCase().includes(titleLower) ||
-                titleLower.includes(r.title.toLowerCase())
-            )
-          ) {
-            continue;
-          }
+      // Filter out books already in results
+      const newCandidates = apiCandidates.filter((cand) => {
+        if (!cand.title || !cand.author || !cand.description || !cand.pageCount) return false;
+        const norm = `${cand.title.toLowerCase().trim()}|${cand.author.toLowerCase().trim()}`;
+        return !seenTitleAuthors.has(norm);
+      });
 
-          const pageCount = apiBook.pageCount ?? null;
-          let inferredLevel: Level = "intermediate";
-          if (pageCount && pageCount <= 300) inferredLevel = "beginner";
-          else if (pageCount && pageCount > 450) inferredLevel = "advanced";
+      if (newCandidates.length > 0) {
+        // Tag new candidates in a single batched structured output call
+        const taggedBatch = await batchTagCandidates(newCandidates.slice(0, 8), primaryGenre);
+
+        for (let i = 0; i < taggedBatch.length; i++) {
+          const raw = newCandidates[i];
+          const tag = taggedBatch[i];
 
           const book: Book = {
-            id: crypto.randomUUID(),
-            title: apiBook.title,
-            author: apiBook.author,
-            genres:
-              preferences.genres.length > 0
-                ? preferences.genres
-                : (apiBook.genres && apiBook.genres.length > 0 ? apiBook.genres : ["fiction"]),
-            level: preferences.level ?? inferredLevel,
-            complexity:
-              inferredLevel === "beginner" ? 2 : inferredLevel === "intermediate" ? 3 : 4,
-            pacing: "medium",
-            tone: preferences.mood.length > 0 ? preferences.mood : ["engaging"],
-            pageCount,
-            description: apiBook.description ?? null,
-            coverUrl: apiBook.coverUrl ?? null,
-            avgRating: apiBook.avgRating ?? 4.0,
-            whyStartHere: `Verified book fact lookup via Google Books API matching "${queryString}".`,
-            amazonSearchUrl: apiBook.amazonSearchUrl,
+            id: raw.id || crypto.randomUUID(),
+            title: raw.title!,
+            author: raw.author!,
+            genres: [primaryGenre],
+            level: tag.level,
+            complexity: tag.complexity,
+            pacing: tag.pacing,
+            tone: tag.tone.length > 0 ? tag.tone : ["engaging"],
+            pageCount: raw.pageCount ?? null,
+            description: raw.description ?? null,
+            coverUrl: raw.coverUrl ?? null,
+            avgRating: raw.avgRating ?? 4.0,
+            whyStartHere: `Curated recommendation matching "${queryString}".`,
+            amazonSearchUrl: raw.amazonSearchUrl,
           };
 
-          results.push(book);
+          if (trackBook(book)) {
+            // Asynchronously cache in Supabase books table with embeddings
+            void cacheBookInDatabase(book);
+          }
         }
       }
+    } catch (apiErr: unknown) {
+      console.error("[STAGE 4: Fallback retrieval error]:", apiErr);
+      if (statsCollector) statsCollector.errors.push(`[STAGE 4: Fallback retrieval error]: ${String(apiErr)}`);
     }
-  } catch (apiErr: unknown) {
-    console.error("Live Google Books candidate retrieval failed:", apiErr);
-    if (statsCollector) statsCollector.errors.push(`[STAGE 4: Google Books error]: ${String(apiErr)}`);
   }
 
   if (statsCollector) {
@@ -173,7 +185,126 @@ export async function searchCatalog(
 }
 
 /**
- * SQL filter: find books matching genre and level.
+ * Batch tag new external books with level, complexity, pacing, tone, and heatLevel
+ * using Gemini structured output.
+ */
+async function batchTagCandidates(
+  candidates: Partial<Book>[],
+  genre: string
+): Promise<Array<{
+  level: Level;
+  complexity: number;
+  pacing: "slow" | "medium" | "fast";
+  tone: string[];
+  heatLevel: "clean" | "mild" | "steamy" | "unknown";
+}>> {
+  try {
+    const model = getChatModel({ maxOutputTokens: 2048, temperature: 0.1 });
+    const structuredModel = model.withStructuredOutput(BatchTaggingSchema);
+
+    const summaries = candidates.map((c, idx) => ({
+      index: idx,
+      title: c.title,
+      author: c.author,
+      pageCount: c.pageCount,
+      description: c.description?.slice(0, 300),
+    }));
+
+    const response = await structuredModel.invoke([
+      {
+        role: "system",
+        content: `You are a literary metadata tagger. Tag each book based STRICTLY on its page count and description.
+Rules:
+1. level: "beginner" (<=300 pages, accessible premise), "intermediate" (300-500 pages), "advanced" (>500 pages or dense literary prose).
+2. complexity: 1 to 5 integer.
+3. pacing: "fast", "medium", or "slow".
+4. tone: array of 1-3 adjectives (e.g. ["humorous", "romantic"]).
+5. heatLevel: for romance/erotica only. "clean", "mild", "steamy", or "unknown" if facts are insufficient.
+Do NOT guess or invent plot facts not present in the description.`,
+      },
+      {
+        role: "user",
+        content: `Genre: ${genre}\nBooks to tag: ${JSON.stringify(summaries)}`,
+      },
+    ]);
+
+    const tagsMap = new Map<number, (typeof response.tags)[0]>();
+    for (const t of response.tags) {
+      tagsMap.set(t.index, t);
+    }
+
+    return candidates.map((c, idx) => {
+      const t = tagsMap.get(idx);
+      if (t) {
+        return {
+          level: t.level,
+          complexity: t.complexity,
+          pacing: t.pacing,
+          tone: t.tone,
+          heatLevel: t.heatLevel,
+        };
+      }
+      const pages = c.pageCount ?? 300;
+      return {
+        level: pages <= 300 ? "beginner" : pages <= 500 ? "intermediate" : "advanced",
+        complexity: pages <= 300 ? 2 : 3,
+        pacing: "medium",
+        tone: ["engaging"],
+        heatLevel: "unknown",
+      };
+    });
+  } catch (err: unknown) {
+    console.error("[STAGE 4: Batch tagging fallback used]:", err);
+    return candidates.map((c) => {
+      const pages = c.pageCount ?? 300;
+      return {
+        level: pages <= 300 ? "beginner" : pages <= 500 ? "intermediate" : "advanced",
+        complexity: pages <= 300 ? 2 : 3,
+        pacing: "medium",
+        tone: ["engaging"],
+        heatLevel: "unknown",
+      };
+    });
+  }
+}
+
+/**
+ * Cache an enriched external book into Supabase books table with embeddings.
+ */
+async function cacheBookInDatabase(book: Book) {
+  try {
+    const embeddings = getEmbeddingsModel();
+    const textToEmbed = `${book.title} by ${book.author}. ${book.description || ""} Genres: ${book.genres.join(", ")}. Tone: ${book.tone.join(", ")}.`;
+    const embedding = await embeddings.embedQuery(textToEmbed);
+
+    await supabase.from("books").upsert(
+      {
+        title: book.title,
+        author: book.author,
+        genres: book.genres,
+        level: book.level,
+        complexity: book.complexity,
+        pacing: book.pacing,
+        tone: book.tone,
+        page_count: book.pageCount,
+        description: book.description,
+        cover_url: book.coverUrl,
+        avg_rating: book.avgRating,
+        google_books_id: book.id,
+        why_start_here: book.whyStartHere,
+        embedding,
+      },
+      { onConflict: "title,author", ignoreDuplicates: true }
+    );
+  } catch (err: unknown) {
+    // Non-fatal caching error: log and continue
+    console.warn(`[STAGE 4: Caching book "${book.title}" in DB]:`, err);
+  }
+}
+
+/**
+ * SQL filter: find books matching genre ONLY.
+ * Never hard-filter by reading level — level is handled as a score component in Task 1!
  */
 async function sqlFilterBooks(
   preferences: Preferences,
@@ -181,12 +312,7 @@ async function sqlFilterBooks(
 ): Promise<Book[]> {
   let query = supabase.from("books").select("*").limit(limit);
 
-  // Filter by level (exact or adjacent)
-  if (preferences.level) {
-    query = query.eq("level", preferences.level);
-  }
-
-  // Filter by genre (any genre in the array)
+  // Filter by genre only (soft filtering)
   if (preferences.genres.length > 0) {
     query = query.overlaps("genres", preferences.genres);
   }
@@ -215,84 +341,59 @@ async function vectorSearchBooks(
 ): Promise<Book[]> {
   try {
     const embeddings = getEmbeddingsModel();
-
-    // Build a search query from mood + similarTo
-    const searchText = [
+    const queryText = [
+      preferences.genres.join(" "),
       ...preferences.mood,
-      ...preferences.similarTo.map((s) => `similar to ${s}`),
-      ...preferences.genres,
-    ].join(", ");
+      ...preferences.similarTo,
+    ]
+      .filter(Boolean)
+      .join(" ");
 
-    const queryEmbedding = await embeddings.embedQuery(searchText);
+    if (!queryText) return [];
+
+    const queryEmbedding = await embeddings.embedQuery(queryText);
 
     const { data, error } = await supabase.rpc("match_books", {
       query_embedding: queryEmbedding,
+      match_threshold: 0.3,
       match_count: limit,
-      filter_genre: preferences.genres[0] ?? null,
-      filter_level: preferences.level ?? null,
+      filter_genres: preferences.genres,
     });
 
     if (error) {
-      console.error("Vector search error:", error);
       return [];
     }
 
-    if (!data || data.length === 0) return [];
-
-    // Fetch full book data for matched IDs
-    const ids = data.map((d: { id: string }) => d.id);
-    const { data: books, error: fetchError } = await supabase
-      .from("books")
-      .select("*")
-      .in("id", ids);
-
-    if (fetchError || !books) return [];
-
-    return books.map((row: BookRow) => rowToBook(row));
-  } catch (error) {
-    console.error("Vector search failed:", error);
+    return (data ?? []).map(rowToBook);
+  } catch {
     return [];
   }
 }
 
 /**
- * Get books for a reading ladder by genre.
- * Returns 3 books ordered by increasing complexity.
+ * Get reading ladder for a genre.
  */
-export async function getReadingLadder(
-  genre: string
-): Promise<Book[]> {
-  // First try the reading_ladders table
-  const { data: ladderData } = await supabase
-    .from("reading_ladders")
-    .select("*, books(*)")
-    .eq("genre", genre)
-    .order("step", { ascending: true })
-    .limit(3);
+export async function getReadingLadder(genre: string): Promise<Book[]> {
+  const levels: Level[] = ["beginner", "intermediate", "advanced"];
+  const ladder: Book[] = [];
 
-  if (ladderData && ladderData.length > 0) {
-    const validLadder = ladderData.filter(
-      (l: { books: BookRow | null }) => l.books !== null
-    );
-    if (validLadder.length > 0) {
-      return validLadder.map((l: { books: BookRow }) => rowToBook(l.books));
+  for (const lvl of levels) {
+    const { data } = await supabase
+      .from("books")
+      .select("*")
+      .contains("genres", [genre.toLowerCase()])
+      .eq("level", lvl)
+      .order("complexity", { ascending: true })
+      .limit(1);
+
+    if (data && data.length > 0) {
+      ladder.push(rowToBook(data[0]));
     }
   }
 
-  // Fallback: pick 3 books from the catalog with increasing complexity
-  const { data: books } = await supabase
-    .from("books")
-    .select("*")
-    .contains("genres", [genre])
-    .order("complexity", { ascending: true })
-    .limit(3);
-
-  return (books ?? []).map(rowToBook);
+  return ladder;
 }
 
-/**
- * Convert a database row to a Book object for the UI.
- */
 function rowToBook(row: BookRow): Book {
   return {
     id: row.id,

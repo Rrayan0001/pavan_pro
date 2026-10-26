@@ -50,7 +50,7 @@ export interface ScoringInput {
 export function scoreLevelMatch(bookLevel: Level, targetLevel: Level): number {
   if (bookLevel === targetLevel) return 1.0;
   if (getAdjacentLevels(targetLevel).includes(bookLevel)) return 0.5;
-  return 0.0;
+  return 0.1;
 }
 
 /**
