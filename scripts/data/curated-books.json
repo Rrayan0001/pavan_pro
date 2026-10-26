@@ -2,11 +2,17 @@
   {
     "title": "The Notebook",
     "author": "Nicholas Sparks",
-    "genres": ["romance"],
+    "genres": [
+      "romance"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["romantic", "emotional", "love story"],
+    "tone": [
+      "romantic",
+      "emotional",
+      "love story"
+    ],
     "page_count": 214,
     "isbn": null,
     "why_start_here": "A beautifully simple love story that proves you don't need complexity to feel deeply moved — perfect for anyone new to romance novels."
@@ -14,11 +20,17 @@
   {
     "title": "The Rosie Project",
     "author": "Graeme Simsion",
-    "genres": ["romance"],
+    "genres": [
+      "romance"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["humorous", "romantic", "quirky"],
+    "tone": [
+      "humorous",
+      "romantic",
+      "quirky"
+    ],
     "page_count": 295,
     "isbn": null,
     "why_start_here": "A laugh-out-loud romantic comedy with a uniquely lovable protagonist — light, fast-paced, and impossible to put down."
@@ -26,11 +38,18 @@
   {
     "title": "Pride and Prejudice",
     "author": "Jane Austen",
-    "genres": ["romance", "classics"],
+    "genres": [
+      "romance",
+      "classics"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "medium",
-    "tone": ["witty", "romantic", "social commentary"],
+    "tone": [
+      "witty",
+      "romantic",
+      "social commentary"
+    ],
     "page_count": 279,
     "isbn": null,
     "why_start_here": "The original enemies-to-lovers story with sharp wit and timeless social observations — a gateway to literary romance."
@@ -38,11 +57,17 @@
   {
     "title": "Beach Read",
     "author": "Emily Henry",
-    "genres": ["romance"],
+    "genres": [
+      "romance"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "medium",
-    "tone": ["romantic", "witty", "contemporary"],
+    "tone": [
+      "romantic",
+      "witty",
+      "contemporary"
+    ],
     "page_count": 361,
     "isbn": null,
     "why_start_here": "A smart, self-aware romance that balances humor with genuine emotional depth — great for readers ready for more substance in their love stories."
@@ -50,11 +75,17 @@
   {
     "title": "Normal People",
     "author": "Sally Rooney",
-    "genres": ["romance"],
+    "genres": [
+      "romance"
+    ],
     "level": "advanced",
     "complexity": 4,
     "pacing": "slow",
-    "tone": ["literary", "intimate", "melancholic"],
+    "tone": [
+      "literary",
+      "intimate",
+      "melancholic"
+    ],
     "page_count": 273,
     "isbn": null,
     "why_start_here": "A masterclass in understated emotional complexity — the sparse prose and psychological depth reward close, careful reading."
@@ -62,11 +93,18 @@
   {
     "title": "The Time Traveler's Wife",
     "author": "Audrey Niffenegger",
-    "genres": ["romance", "sci-fi"],
+    "genres": [
+      "romance",
+      "sci-fi"
+    ],
     "level": "advanced",
     "complexity": 4,
     "pacing": "slow",
-    "tone": ["romantic", "bittersweet", "complex"],
+    "tone": [
+      "romantic",
+      "bittersweet",
+      "complex"
+    ],
     "page_count": 518,
     "isbn": null,
     "why_start_here": "A structurally ambitious love story told across fractured timelines — demands and rewards an experienced reader's full attention."
@@ -74,11 +112,20 @@
   {
     "title": "Finlay Donovan Is Killing It",
     "author": "Elle Cosimano",
-    "genres": ["romance", "thriller", "mystery"],
+    "genres": [
+      "romance",
+      "thriller",
+      "mystery"
+    ],
     "level": "beginner",
     "complexity": 2,
     "pacing": "fast",
-    "tone": ["humorous", "romantic comedy", "suspenseful", "quirky"],
+    "tone": [
+      "humorous",
+      "romantic comedy",
+      "suspenseful",
+      "quirky"
+    ],
     "page_count": 355,
     "isbn": null,
     "why_start_here": "A hilarious romantic comedy accidentally tangled with contract murder — the quintessential rom-com thriller that is wildly entertaining and fast-paced."
@@ -86,11 +133,18 @@
   {
     "title": "The Hating Game",
     "author": "Sally Thorne",
-    "genres": ["romance"],
+    "genres": [
+      "romance"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["enemies-to-lovers", "witty", "romantic comedy", "banter"],
+    "tone": [
+      "enemies-to-lovers",
+      "witty",
+      "romantic comedy",
+      "banter"
+    ],
     "page_count": 384,
     "isbn": null,
     "why_start_here": "The modern benchmark for office romantic comedy and enemies-to-lovers banter — snappy, delightful, and deeply charming."
@@ -98,11 +152,20 @@
   {
     "title": "Dial A for Aunties",
     "author": "Jesse Q. Sutanto",
-    "genres": ["romance", "thriller", "mystery"],
+    "genres": [
+      "romance",
+      "thriller",
+      "mystery"
+    ],
     "level": "beginner",
     "complexity": 2,
     "pacing": "fast",
-    "tone": ["hilarious", "romantic comedy", "chaotic", "accidental crime"],
+    "tone": [
+      "hilarious",
+      "romantic comedy",
+      "chaotic",
+      "accidental crime"
+    ],
     "page_count": 299,
     "isbn": null,
     "why_start_here": "Part hilarious rom-com, part accidental crime thriller with meddling aunties — an uproarious, high-energy page turner."
@@ -110,11 +173,19 @@
   {
     "title": "Verity",
     "author": "Colleen Hoover",
-    "genres": ["romance", "thriller"],
+    "genres": [
+      "romance",
+      "thriller"
+    ],
     "level": "intermediate",
     "complexity": 3,
     "pacing": "fast",
-    "tone": ["twisted", "dark romance", "psychological thriller", "shocking"],
+    "tone": [
+      "twisted",
+      "dark romance",
+      "psychological thriller",
+      "shocking"
+    ],
     "page_count": 336,
     "isbn": null,
     "why_start_here": "A gripping fusion of romance and psychological thriller with jaw-dropping twists that keep you guessing until the final page."
@@ -122,11 +193,18 @@
   {
     "title": "Book Lovers",
     "author": "Emily Henry",
-    "genres": ["romance"],
+    "genres": [
+      "romance"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "fast",
-    "tone": ["witty", "literary humor", "romantic comedy", "heartfelt"],
+    "tone": [
+      "witty",
+      "literary humor",
+      "romantic comedy",
+      "heartfelt"
+    ],
     "page_count": 384,
     "isbn": null,
     "why_start_here": "A sparkling, clever rom-com that subverts classic city-girl literary tropes with sharp banter and heartfelt warmth."
@@ -134,11 +212,18 @@
   {
     "title": "Red, White & Royal Blue",
     "author": "Casey McQuiston",
-    "genres": ["romance"],
+    "genres": [
+      "romance"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "fast",
-    "tone": ["romantic comedy", "witty", "political", "heartfelt"],
+    "tone": [
+      "romantic comedy",
+      "witty",
+      "political",
+      "heartfelt"
+    ],
     "page_count": 421,
     "isbn": null,
     "why_start_here": "A charming, witty romantic comedy about First Son of America and Prince of Wales with delightful humor and chemistry."
@@ -146,11 +231,19 @@
   {
     "title": "You",
     "author": "Caroline Kepnes",
-    "genres": ["thriller", "romance"],
+    "genres": [
+      "thriller",
+      "romance"
+    ],
     "level": "advanced",
     "complexity": 4,
     "pacing": "medium",
-    "tone": ["dark", "obsessive", "psychological thriller", "chilling"],
+    "tone": [
+      "dark",
+      "obsessive",
+      "psychological thriller",
+      "chilling"
+    ],
     "page_count": 432,
     "isbn": null,
     "why_start_here": "A brilliant, disturbing deep dive into obsession and dark romance from the perspective of an unreliable narrator."
@@ -158,11 +251,17 @@
   {
     "title": "The Woman in Cabin 10",
     "author": "Ruth Ware",
-    "genres": ["thriller"],
+    "genres": [
+      "thriller"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["suspenseful", "claustrophobic", "twist"],
+    "tone": [
+      "suspenseful",
+      "claustrophobic",
+      "twist"
+    ],
     "page_count": 288,
     "isbn": null,
     "why_start_here": "A tight, contained thriller on a luxury cruise — the confined setting and relentless pace make it a perfect first thriller."
@@ -170,11 +269,18 @@
   {
     "title": "One of Us Is Lying",
     "author": "Karen M. McManus",
-    "genres": ["thriller", "mystery"],
+    "genres": [
+      "thriller",
+      "mystery"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["suspenseful", "YA", "twist"],
+    "tone": [
+      "suspenseful",
+      "YA",
+      "twist"
+    ],
     "page_count": 360,
     "isbn": null,
     "why_start_here": "A high-school whodunit with short chapters and multiple narrators that keeps pages flying — ideal for readers who want instant hooks."
@@ -182,11 +288,17 @@
   {
     "title": "The Girl on the Train",
     "author": "Paula Hawkins",
-    "genres": ["thriller"],
+    "genres": [
+      "thriller"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "fast",
-    "tone": ["suspenseful", "psychological", "unreliable narrator"],
+    "tone": [
+      "suspenseful",
+      "psychological",
+      "unreliable narrator"
+    ],
     "page_count": 336,
     "isbn": null,
     "why_start_here": "Introduces the unreliable narrator concept through three interweaving perspectives — a step up in complexity that still races to the finish."
@@ -194,11 +306,17 @@
   {
     "title": "The Silent Patient",
     "author": "Alex Michaelides",
-    "genres": ["thriller"],
+    "genres": [
+      "thriller"
+    ],
     "level": "intermediate",
     "complexity": 3,
     "pacing": "medium",
-    "tone": ["psychological", "twist", "dark"],
+    "tone": [
+      "psychological",
+      "twist",
+      "dark"
+    ],
     "page_count": 325,
     "isbn": null,
     "why_start_here": "A psychological thriller built around one devastating twist — teaches you to question everything you're told in a story."
@@ -206,11 +324,17 @@
   {
     "title": "Gone Girl",
     "author": "Gillian Flynn",
-    "genres": ["thriller"],
+    "genres": [
+      "thriller"
+    ],
     "level": "advanced",
     "complexity": 5,
     "pacing": "medium",
-    "tone": ["dark", "psychological", "unreliable narrator"],
+    "tone": [
+      "dark",
+      "psychological",
+      "unreliable narrator"
+    ],
     "page_count": 415,
     "isbn": null,
     "why_start_here": "A masterpiece of narrative misdirection with deeply unreliable narrators and biting social commentary — the benchmark for modern thrillers."
@@ -218,11 +342,18 @@
   {
     "title": "The Girl with the Dragon Tattoo",
     "author": "Stieg Larsson",
-    "genres": ["thriller", "mystery"],
+    "genres": [
+      "thriller",
+      "mystery"
+    ],
     "level": "advanced",
     "complexity": 4,
     "pacing": "slow",
-    "tone": ["dark", "complex", "investigative"],
+    "tone": [
+      "dark",
+      "complex",
+      "investigative"
+    ],
     "page_count": 672,
     "isbn": null,
     "why_start_here": "A sprawling Scandinavian thriller that weaves corporate corruption, family secrets, and hacking into a dense, rewarding mystery."
@@ -230,11 +361,18 @@
   {
     "title": "Coraline",
     "author": "Neil Gaiman",
-    "genres": ["horror", "fantasy"],
+    "genres": [
+      "horror",
+      "fantasy"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["creepy", "atmospheric", "dark fantasy"],
+    "tone": [
+      "creepy",
+      "atmospheric",
+      "dark fantasy"
+    ],
     "page_count": 163,
     "isbn": null,
     "why_start_here": "A deliciously creepy tale that proves horror doesn't need gore — short, atmospheric, and genuinely unsettling in the best way."
@@ -242,11 +380,17 @@
   {
     "title": "The Haunting of Hill House",
     "author": "Shirley Jackson",
-    "genres": ["horror"],
+    "genres": [
+      "horror"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "medium",
-    "tone": ["atmospheric", "psychological", "gothic"],
+    "tone": [
+      "atmospheric",
+      "psychological",
+      "gothic"
+    ],
     "page_count": 246,
     "isbn": null,
     "why_start_here": "The quintessential haunted house novel — Jackson builds dread through suggestion rather than shock, making it an ideal first horror read."
@@ -254,11 +398,17 @@
   {
     "title": "Pet Sematary",
     "author": "Stephen King",
-    "genres": ["horror"],
+    "genres": [
+      "horror"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "medium",
-    "tone": ["disturbing", "grief", "supernatural"],
+    "tone": [
+      "disturbing",
+      "grief",
+      "supernatural"
+    ],
     "page_count": 374,
     "isbn": null,
     "why_start_here": "King at his most emotionally devastating — explores grief through supernatural horror with a steadily tightening sense of dread."
@@ -266,11 +416,17 @@
   {
     "title": "The Shining",
     "author": "Stephen King",
-    "genres": ["horror"],
+    "genres": [
+      "horror"
+    ],
     "level": "intermediate",
     "complexity": 3,
     "pacing": "medium",
-    "tone": ["psychological", "isolation", "supernatural"],
+    "tone": [
+      "psychological",
+      "isolation",
+      "supernatural"
+    ],
     "page_count": 447,
     "isbn": null,
     "why_start_here": "A masterwork of slow-building psychological horror with rich character development — the Overlook Hotel stays with you long after finishing."
@@ -278,11 +434,17 @@
   {
     "title": "House of Leaves",
     "author": "Mark Z. Danielewski",
-    "genres": ["horror"],
+    "genres": [
+      "horror"
+    ],
     "level": "advanced",
     "complexity": 5,
     "pacing": "slow",
-    "tone": ["experimental", "psychological", "labyrinthine"],
+    "tone": [
+      "experimental",
+      "psychological",
+      "labyrinthine"
+    ],
     "page_count": 709,
     "isbn": null,
     "why_start_here": "A genre-defying feat of experimental fiction — the book itself becomes a labyrinth, demanding and rewarding readers who love puzzles."
@@ -290,11 +452,17 @@
   {
     "title": "The Exorcist",
     "author": "William Peter Blatty",
-    "genres": ["horror"],
+    "genres": [
+      "horror"
+    ],
     "level": "advanced",
     "complexity": 4,
     "pacing": "slow",
-    "tone": ["disturbing", "religious", "psychological"],
+    "tone": [
+      "disturbing",
+      "religious",
+      "psychological"
+    ],
     "page_count": 400,
     "isbn": null,
     "why_start_here": "A deeply researched and philosophically rich horror novel that examines faith, doubt, and evil with literary ambition beyond the genre."
@@ -302,11 +470,18 @@
   {
     "title": "The Hunger Games",
     "author": "Suzanne Collins",
-    "genres": ["action/adventure", "sci-fi"],
+    "genres": [
+      "action/adventure",
+      "sci-fi"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["action-packed", "dystopian", "survival"],
+    "tone": [
+      "action-packed",
+      "dystopian",
+      "survival"
+    ],
     "page_count": 374,
     "isbn": null,
     "why_start_here": "Non-stop action from page one with a fierce, relatable protagonist — the book that proved dystopia could be thrilling and accessible."
@@ -314,11 +489,18 @@
   {
     "title": "Ready Player One",
     "author": "Ernest Cline",
-    "genres": ["action/adventure", "sci-fi"],
+    "genres": [
+      "action/adventure",
+      "sci-fi"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["fun", "nostalgic", "gaming"],
+    "tone": [
+      "fun",
+      "nostalgic",
+      "gaming"
+    ],
     "page_count": 374,
     "isbn": null,
     "why_start_here": "A geeky, fast-paced treasure hunt through pop culture — pure fun that reads like a video game and appeals to readers of all backgrounds."
@@ -326,11 +508,18 @@
   {
     "title": "The Maze Runner",
     "author": "James Dashner",
-    "genres": ["action/adventure", "sci-fi"],
+    "genres": [
+      "action/adventure",
+      "sci-fi"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "fast",
-    "tone": ["action-packed", "dystopian", "mystery"],
+    "tone": [
+      "action-packed",
+      "dystopian",
+      "mystery"
+    ],
     "page_count": 375,
     "isbn": null,
     "why_start_here": "Combines relentless action with a deepening mystery — each chapter peels back a layer, teaching readers to enjoy sustained suspense."
@@ -338,11 +527,18 @@
   {
     "title": "Jurassic Park",
     "author": "Michael Crichton",
-    "genres": ["action/adventure", "sci-fi"],
+    "genres": [
+      "action/adventure",
+      "sci-fi"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "fast",
-    "tone": ["thrilling", "scientific", "action-packed"],
+    "tone": [
+      "thrilling",
+      "scientific",
+      "action-packed"
+    ],
     "page_count": 448,
     "isbn": null,
     "why_start_here": "Science-driven action that's smarter than the movie — Crichton weaves chaos theory into dinosaur chases with addictive readability."
@@ -350,11 +546,18 @@
   {
     "title": "The Count of Monte Cristo",
     "author": "Alexandre Dumas",
-    "genres": ["action/adventure", "classics"],
+    "genres": [
+      "action/adventure",
+      "classics"
+    ],
     "level": "advanced",
     "complexity": 5,
     "pacing": "slow",
-    "tone": ["revenge", "epic", "political"],
+    "tone": [
+      "revenge",
+      "epic",
+      "political"
+    ],
     "page_count": 1276,
     "isbn": null,
     "why_start_here": "The ultimate revenge epic — a massive, intricately plotted saga that rewards patient readers with one of literature's most satisfying payoffs."
@@ -362,11 +565,17 @@
   {
     "title": "Shogun",
     "author": "James Clavell",
-    "genres": ["action/adventure"],
+    "genres": [
+      "action/adventure"
+    ],
     "level": "advanced",
     "complexity": 5,
     "pacing": "slow",
-    "tone": ["epic", "historical", "political"],
+    "tone": [
+      "epic",
+      "historical",
+      "political"
+    ],
     "page_count": 1152,
     "isbn": null,
     "why_start_here": "An immersive epic set in feudal Japan that balances political intrigue, cultural clash, and action across a sweeping narrative canvas."
@@ -374,11 +583,17 @@
   {
     "title": "The Thursday Murder Club",
     "author": "Richard Osman",
-    "genres": ["mystery"],
+    "genres": [
+      "mystery"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["humorous", "cozy", "charming"],
+    "tone": [
+      "humorous",
+      "cozy",
+      "charming"
+    ],
     "page_count": 369,
     "isbn": null,
     "why_start_here": "A cozy mystery with laugh-out-loud humor and lovable retiree detectives — proof that murder mysteries can be warm and welcoming."
@@ -386,11 +601,17 @@
   {
     "title": "Big Little Lies",
     "author": "Liane Moriarty",
-    "genres": ["mystery"],
+    "genres": [
+      "mystery"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["witty", "domestic", "suspenseful"],
+    "tone": [
+      "witty",
+      "domestic",
+      "suspenseful"
+    ],
     "page_count": 460,
     "isbn": null,
     "why_start_here": "A page-turning suburban mystery with sharp wit and relatable characters — easy to get into and impossible to stop reading."
@@ -398,11 +619,17 @@
   {
     "title": "And Then There Were None",
     "author": "Agatha Christie",
-    "genres": ["mystery"],
+    "genres": [
+      "mystery"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "medium",
-    "tone": ["classic", "puzzle", "suspenseful"],
+    "tone": [
+      "classic",
+      "puzzle",
+      "suspenseful"
+    ],
     "page_count": 272,
     "isbn": null,
     "why_start_here": "Christie's masterpiece of misdirection — ten strangers, one island, and a puzzle so clever it defined the mystery genre forever."
@@ -410,11 +637,18 @@
   {
     "title": "The Da Vinci Code",
     "author": "Dan Brown",
-    "genres": ["mystery", "thriller"],
+    "genres": [
+      "mystery",
+      "thriller"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "fast",
-    "tone": ["puzzle", "conspiracy", "fast-paced"],
+    "tone": [
+      "puzzle",
+      "conspiracy",
+      "fast-paced"
+    ],
     "page_count": 454,
     "isbn": null,
     "why_start_here": "A globe-trotting puzzle thriller with short chapters that end on cliffhangers — perfect for readers who want brains and speed."
@@ -422,11 +656,17 @@
   {
     "title": "In the Woods",
     "author": "Tana French",
-    "genres": ["mystery"],
+    "genres": [
+      "mystery"
+    ],
     "level": "advanced",
     "complexity": 4,
     "pacing": "slow",
-    "tone": ["literary", "atmospheric", "psychological"],
+    "tone": [
+      "literary",
+      "atmospheric",
+      "psychological"
+    ],
     "page_count": 429,
     "isbn": null,
     "why_start_here": "A literary mystery that prioritizes psychological depth over plot mechanics — French's prose elevates the genre to art."
@@ -434,11 +674,18 @@
   {
     "title": "The Name of the Rose",
     "author": "Umberto Eco",
-    "genres": ["mystery", "classics"],
+    "genres": [
+      "mystery",
+      "classics"
+    ],
     "level": "advanced",
     "complexity": 5,
     "pacing": "slow",
-    "tone": ["intellectual", "historical", "philosophical"],
+    "tone": [
+      "intellectual",
+      "historical",
+      "philosophical"
+    ],
     "page_count": 536,
     "isbn": null,
     "why_start_here": "A medieval murder mystery wrapped in semiotics and theology — a feast for readers who love ideas as much as intrigue."
@@ -446,11 +693,17 @@
   {
     "title": "The Martian",
     "author": "Andy Weir",
-    "genres": ["sci-fi"],
+    "genres": [
+      "sci-fi"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["humorous", "scientific", "survival"],
+    "tone": [
+      "humorous",
+      "scientific",
+      "survival"
+    ],
     "page_count": 369,
     "isbn": null,
     "why_start_here": "Science fiction that feels like hanging out with the funniest engineer you know — accessible, thrilling, and genuinely educational."
@@ -458,11 +711,17 @@
   {
     "title": "Ender's Game",
     "author": "Orson Scott Card",
-    "genres": ["sci-fi"],
+    "genres": [
+      "sci-fi"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["strategic", "coming-of-age", "military"],
+    "tone": [
+      "strategic",
+      "coming-of-age",
+      "military"
+    ],
     "page_count": 324,
     "isbn": null,
     "why_start_here": "A brilliantly paced story about a child genius in military school — the twist ending has been launching sci-fi readers for decades."
@@ -470,11 +729,17 @@
   {
     "title": "Project Hail Mary",
     "author": "Andy Weir",
-    "genres": ["sci-fi"],
+    "genres": [
+      "sci-fi"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "fast",
-    "tone": ["scientific", "humorous", "first contact"],
+    "tone": [
+      "scientific",
+      "humorous",
+      "first contact"
+    ],
     "page_count": 476,
     "isbn": null,
     "why_start_here": "The Martian's spiritual successor with even higher stakes and an unforgettable alien friendship — science-driven storytelling at its best."
@@ -482,11 +747,18 @@
   {
     "title": "Dune",
     "author": "Frank Herbert",
-    "genres": ["sci-fi", "fantasy"],
+    "genres": [
+      "sci-fi",
+      "fantasy"
+    ],
     "level": "intermediate",
     "complexity": 3,
     "pacing": "medium",
-    "tone": ["epic", "political", "desert"],
+    "tone": [
+      "epic",
+      "political",
+      "desert"
+    ],
     "page_count": 412,
     "isbn": null,
     "why_start_here": "The foundational space opera that blends ecology, politics, and religion into an epic world — challenging but endlessly rewarding."
@@ -494,11 +766,17 @@
   {
     "title": "Neuromancer",
     "author": "William Gibson",
-    "genres": ["sci-fi"],
+    "genres": [
+      "sci-fi"
+    ],
     "level": "advanced",
     "complexity": 4,
     "pacing": "medium",
-    "tone": ["cyberpunk", "noir", "dense"],
+    "tone": [
+      "cyberpunk",
+      "noir",
+      "dense"
+    ],
     "page_count": 271,
     "isbn": null,
     "why_start_here": "The novel that invented cyberpunk — Gibson's dense, poetic prose demands rereading and rewards every pass with new meaning."
@@ -506,11 +784,17 @@
   {
     "title": "Blindsight",
     "author": "Peter Watts",
-    "genres": ["sci-fi"],
+    "genres": [
+      "sci-fi"
+    ],
     "level": "advanced",
     "complexity": 5,
     "pacing": "slow",
-    "tone": ["hard sci-fi", "philosophical", "alien"],
+    "tone": [
+      "hard sci-fi",
+      "philosophical",
+      "alien"
+    ],
     "page_count": 384,
     "isbn": null,
     "why_start_here": "A philosophically rigorous first contact novel that questions the nature of consciousness itself — hard sci-fi at its most intellectually daring."
@@ -518,11 +802,17 @@
   {
     "title": "The Hobbit",
     "author": "J.R.R. Tolkien",
-    "genres": ["fantasy"],
+    "genres": [
+      "fantasy"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "medium",
-    "tone": ["adventurous", "whimsical", "classic"],
+    "tone": [
+      "adventurous",
+      "whimsical",
+      "classic"
+    ],
     "page_count": 310,
     "isbn": null,
     "why_start_here": "The gentle, whimsical adventure that launched modern fantasy — Tolkien's warm narrative voice makes Middle-earth welcoming to all."
@@ -530,11 +820,17 @@
   {
     "title": "Harry Potter and the Sorcerer's Stone",
     "author": "J.K. Rowling",
-    "genres": ["fantasy"],
+    "genres": [
+      "fantasy"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["magical", "coming-of-age", "charming"],
+    "tone": [
+      "magical",
+      "coming-of-age",
+      "charming"
+    ],
     "page_count": 309,
     "isbn": null,
     "why_start_here": "The book that made an entire generation fall in love with reading — magical, accessible, and brimming with wonder."
@@ -542,11 +838,17 @@
   {
     "title": "The Name of the Wind",
     "author": "Patrick Rothfuss",
-    "genres": ["fantasy"],
+    "genres": [
+      "fantasy"
+    ],
     "level": "intermediate",
     "complexity": 3,
     "pacing": "medium",
-    "tone": ["lyrical", "epic", "magical"],
+    "tone": [
+      "lyrical",
+      "epic",
+      "magical"
+    ],
     "page_count": 662,
     "isbn": null,
     "why_start_here": "A fantasy novel with prose so beautiful it reads like poetry — Rothfuss proves the genre can be literary and absorbing."
@@ -554,11 +856,17 @@
   {
     "title": "Mistborn: The Final Empire",
     "author": "Brandon Sanderson",
-    "genres": ["fantasy"],
+    "genres": [
+      "fantasy"
+    ],
     "level": "intermediate",
     "complexity": 3,
     "pacing": "medium",
-    "tone": ["action-packed", "systematic magic", "heist"],
+    "tone": [
+      "action-packed",
+      "systematic magic",
+      "heist"
+    ],
     "page_count": 541,
     "isbn": null,
     "why_start_here": "A fantasy heist with the most inventive magic system in the genre — Sanderson's clear, propulsive writing makes complex worldbuilding feel effortless."
@@ -566,11 +874,17 @@
   {
     "title": "The Lord of the Rings: The Fellowship of the Ring",
     "author": "J.R.R. Tolkien",
-    "genres": ["fantasy"],
+    "genres": [
+      "fantasy"
+    ],
     "level": "advanced",
     "complexity": 4,
     "pacing": "slow",
-    "tone": ["epic", "detailed worldbuilding", "literary"],
+    "tone": [
+      "epic",
+      "detailed worldbuilding",
+      "literary"
+    ],
     "page_count": 423,
     "isbn": null,
     "why_start_here": "The foundation of epic fantasy — Tolkien's rich languages, histories, and landscapes demand and reward a dedicated reader's attention."
@@ -578,11 +892,17 @@
   {
     "title": "Gardens of the Moon",
     "author": "Steven Erikson",
-    "genres": ["fantasy"],
+    "genres": [
+      "fantasy"
+    ],
     "level": "advanced",
     "complexity": 5,
     "pacing": "slow",
-    "tone": ["dense", "military", "epic"],
+    "tone": [
+      "dense",
+      "military",
+      "epic"
+    ],
     "page_count": 496,
     "isbn": null,
     "why_start_here": "The most ambitious fantasy series ever written starts here — Erikson drops you into a vast world and trusts you to keep up."
@@ -590,11 +910,17 @@
   {
     "title": "Atomic Habits",
     "author": "James Clear",
-    "genres": ["motivational/self-help"],
+    "genres": [
+      "motivational/self-help"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["practical", "habit-building", "actionable"],
+    "tone": [
+      "practical",
+      "habit-building",
+      "actionable"
+    ],
     "page_count": 320,
     "isbn": null,
     "why_start_here": "The most actionable self-help book in years — each chapter gives you a concrete strategy you can implement immediately."
@@ -602,11 +928,17 @@
   {
     "title": "The Subtle Art of Not Giving a F*ck",
     "author": "Mark Manson",
-    "genres": ["motivational/self-help"],
+    "genres": [
+      "motivational/self-help"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["irreverent", "practical", "honest"],
+    "tone": [
+      "irreverent",
+      "practical",
+      "honest"
+    ],
     "page_count": 224,
     "isbn": null,
     "why_start_here": "A refreshingly blunt counterpoint to toxic positivity — short, punchy, and full of uncomfortable truths delivered with humor."
@@ -614,11 +946,18 @@
   {
     "title": "Thinking, Fast and Slow",
     "author": "Daniel Kahneman",
-    "genres": ["motivational/self-help", "non-fiction"],
+    "genres": [
+      "motivational/self-help",
+      "non-fiction"
+    ],
     "level": "intermediate",
     "complexity": 3,
     "pacing": "medium",
-    "tone": ["analytical", "research-based", "insightful"],
+    "tone": [
+      "analytical",
+      "research-based",
+      "insightful"
+    ],
     "page_count": 499,
     "isbn": null,
     "why_start_here": "A Nobel laureate's accessible tour of how your mind actually works — transforms how you think about thinking."
@@ -626,11 +965,17 @@
   {
     "title": "The 7 Habits of Highly Effective People",
     "author": "Stephen R. Covey",
-    "genres": ["motivational/self-help"],
+    "genres": [
+      "motivational/self-help"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "medium",
-    "tone": ["systematic", "leadership", "principles"],
+    "tone": [
+      "systematic",
+      "leadership",
+      "principles"
+    ],
     "page_count": 381,
     "isbn": null,
     "why_start_here": "A principle-centered framework that has guided leaders for decades — structured, thoughtful, and endlessly applicable."
@@ -638,11 +983,18 @@
   {
     "title": "Man's Search for Meaning",
     "author": "Viktor E. Frankl",
-    "genres": ["motivational/self-help", "non-fiction"],
+    "genres": [
+      "motivational/self-help",
+      "non-fiction"
+    ],
     "level": "advanced",
     "complexity": 4,
     "pacing": "slow",
-    "tone": ["philosophical", "profound", "existential"],
+    "tone": [
+      "philosophical",
+      "profound",
+      "existential"
+    ],
     "page_count": 184,
     "isbn": null,
     "why_start_here": "A Holocaust survivor's meditation on purpose and suffering — short in pages but immense in depth, demanding reflection on every page."
@@ -650,11 +1002,18 @@
   {
     "title": "Meditations",
     "author": "Marcus Aurelius",
-    "genres": ["motivational/self-help", "classics"],
+    "genres": [
+      "motivational/self-help",
+      "classics"
+    ],
     "level": "advanced",
     "complexity": 5,
     "pacing": "slow",
-    "tone": ["philosophical", "stoic", "reflective"],
+    "tone": [
+      "philosophical",
+      "stoic",
+      "reflective"
+    ],
     "page_count": 256,
     "isbn": null,
     "why_start_here": "A Roman emperor's private journal of Stoic philosophy — each passage is dense with meaning and best absorbed slowly over time."
@@ -662,11 +1021,17 @@
   {
     "title": "A Short History of Nearly Everything",
     "author": "Bill Bryson",
-    "genres": ["non-fiction"],
+    "genres": [
+      "non-fiction"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["accessible", "humorous", "scientific"],
+    "tone": [
+      "accessible",
+      "humorous",
+      "scientific"
+    ],
     "page_count": 544,
     "isbn": null,
     "why_start_here": "Bryson makes the entire history of science laugh-out-loud funny — the proof that non-fiction can be as entertaining as any novel."
@@ -674,11 +1039,17 @@
   {
     "title": "Freakonomics",
     "author": "Steven D. Levitt",
-    "genres": ["non-fiction"],
+    "genres": [
+      "non-fiction"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["provocative", "witty", "economics"],
+    "tone": [
+      "provocative",
+      "witty",
+      "economics"
+    ],
     "page_count": 315,
     "isbn": null,
     "why_start_here": "Reveals the hidden side of everything through surprising data stories — short chapters and counterintuitive findings keep every page fresh."
@@ -686,11 +1057,17 @@
   {
     "title": "Sapiens",
     "author": "Yuval Noah Harari",
-    "genres": ["non-fiction"],
+    "genres": [
+      "non-fiction"
+    ],
     "level": "intermediate",
     "complexity": 3,
     "pacing": "medium",
-    "tone": ["sweeping", "historical", "thought-provoking"],
+    "tone": [
+      "sweeping",
+      "historical",
+      "thought-provoking"
+    ],
     "page_count": 443,
     "isbn": null,
     "why_start_here": "A sweeping history of humankind that challenges everything you thought you knew — ambitious in scope but always readable."
@@ -698,11 +1075,17 @@
   {
     "title": "The Immortal Life of Henrietta Lacks",
     "author": "Rebecca Skloot",
-    "genres": ["non-fiction"],
+    "genres": [
+      "non-fiction"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "medium",
-    "tone": ["narrative", "scientific", "ethical"],
+    "tone": [
+      "narrative",
+      "scientific",
+      "ethical"
+    ],
     "page_count": 381,
     "isbn": null,
     "why_start_here": "Science, ethics, and family history woven into a page-turning narrative — reads like a novel while teaching you about cellular biology."
@@ -710,11 +1093,17 @@
   {
     "title": "Guns, Germs, and Steel",
     "author": "Jared Diamond",
-    "genres": ["non-fiction"],
+    "genres": [
+      "non-fiction"
+    ],
     "level": "advanced",
     "complexity": 4,
     "pacing": "slow",
-    "tone": ["academic", "historical", "analytical"],
+    "tone": [
+      "academic",
+      "historical",
+      "analytical"
+    ],
     "page_count": 528,
     "isbn": null,
     "why_start_here": "A sweeping, data-driven argument about why civilizations developed differently — demands careful reading but reshapes your worldview."
@@ -722,11 +1111,17 @@
   {
     "title": "Gödel, Escher, Bach",
     "author": "Douglas R. Hofstadter",
-    "genres": ["non-fiction"],
+    "genres": [
+      "non-fiction"
+    ],
     "level": "advanced",
     "complexity": 5,
     "pacing": "slow",
-    "tone": ["intellectual", "mathematical", "philosophical"],
+    "tone": [
+      "intellectual",
+      "mathematical",
+      "philosophical"
+    ],
     "page_count": 777,
     "isbn": null,
     "why_start_here": "A Pulitzer-winning exploration of consciousness through mathematics, art, and music — one of the most intellectually stimulating books ever written."
@@ -734,11 +1129,17 @@
   {
     "title": "Animal Farm",
     "author": "George Orwell",
-    "genres": ["classics"],
+    "genres": [
+      "classics"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "fast",
-    "tone": ["allegorical", "political", "accessible"],
+    "tone": [
+      "allegorical",
+      "political",
+      "accessible"
+    ],
     "page_count": 112,
     "isbn": null,
     "why_start_here": "A political allegory disguised as a farmyard tale — at just 112 pages, it's the perfect gateway to understanding literary classics."
@@ -746,11 +1147,17 @@
   {
     "title": "The Old Man and the Sea",
     "author": "Ernest Hemingway",
-    "genres": ["classics"],
+    "genres": [
+      "classics"
+    ],
     "level": "beginner",
     "complexity": 1,
     "pacing": "medium",
-    "tone": ["sparse", "philosophical", "nature"],
+    "tone": [
+      "sparse",
+      "philosophical",
+      "nature"
+    ],
     "page_count": 127,
     "isbn": null,
     "why_start_here": "Hemingway's lean, powerful prose tells a universal story of perseverance — short enough to read in an afternoon, profound enough to think about for years."
@@ -758,11 +1165,17 @@
   {
     "title": "To Kill a Mockingbird",
     "author": "Harper Lee",
-    "genres": ["classics"],
+    "genres": [
+      "classics"
+    ],
     "level": "intermediate",
     "complexity": 2,
     "pacing": "medium",
-    "tone": ["moral", "Southern", "coming-of-age"],
+    "tone": [
+      "moral",
+      "Southern",
+      "coming-of-age"
+    ],
     "page_count": 281,
     "isbn": null,
     "why_start_here": "A moral compass in novel form — Scout's innocent perspective makes weighty themes of justice and prejudice deeply personal and accessible."
@@ -770,11 +1183,18 @@
   {
     "title": "1984",
     "author": "George Orwell",
-    "genres": ["classics", "sci-fi"],
+    "genres": [
+      "classics",
+      "sci-fi"
+    ],
     "level": "intermediate",
     "complexity": 3,
     "pacing": "medium",
-    "tone": ["dystopian", "political", "dark"],
+    "tone": [
+      "dystopian",
+      "political",
+      "dark"
+    ],
     "page_count": 328,
     "isbn": null,
     "why_start_here": "The dystopian novel that gave us 'Big Brother' and 'doublethink' — chillingly relevant and structurally tight enough to keep you gripped."
@@ -782,11 +1202,17 @@
   {
     "title": "Crime and Punishment",
     "author": "Fyodor Dostoevsky",
-    "genres": ["classics"],
+    "genres": [
+      "classics"
+    ],
     "level": "advanced",
     "complexity": 5,
     "pacing": "slow",
-    "tone": ["psychological", "philosophical", "moral"],
+    "tone": [
+      "psychological",
+      "philosophical",
+      "moral"
+    ],
     "page_count": 671,
     "isbn": null,
     "why_start_here": "A psychological deep-dive into guilt and redemption — Dostoevsky's exploration of a murderer's mind remains the gold standard for literary fiction."
@@ -794,13 +1220,561 @@
   {
     "title": "Ulysses",
     "author": "James Joyce",
-    "genres": ["classics"],
+    "genres": [
+      "classics"
+    ],
     "level": "advanced",
     "complexity": 5,
     "pacing": "slow",
-    "tone": ["experimental", "stream-of-consciousness", "literary"],
+    "tone": [
+      "experimental",
+      "stream-of-consciousness",
+      "literary"
+    ],
     "page_count": 730,
     "isbn": null,
     "why_start_here": "The Mount Everest of literature — Joyce's revolutionary stream-of-consciousness technique rewards the most dedicated and experienced readers."
+  },
+  {
+    "title": "The Love Hypothesis",
+    "author": "Ali Hazelwood",
+    "genres": [
+      "romance"
+    ],
+    "level": "beginner",
+    "complexity": 1,
+    "pacing": "fast",
+    "tone": [
+      "rom-com",
+      "fake dating",
+      "witty",
+      "humorous",
+      "mild"
+    ],
+    "page_count": 384,
+    "isbn": null,
+    "why_start_here": "A laugh-out-loud academic fake-dating rom-com packed with charm and quick banter."
+  },
+  {
+    "title": "The Flatshare",
+    "author": "Beth O'Leary",
+    "genres": [
+      "romance"
+    ],
+    "level": "beginner",
+    "complexity": 1,
+    "pacing": "fast",
+    "tone": [
+      "rom-com",
+      "heartwarming",
+      "quirky",
+      "clean",
+      "slow-burn"
+    ],
+    "page_count": 336,
+    "isbn": null,
+    "why_start_here": "A delightfully heartwarming story of two strangers sharing a bed without ever meeting."
+  },
+  {
+    "title": "The Kiss Quotient",
+    "author": "Helen Hoang",
+    "genres": [
+      "romance"
+    ],
+    "level": "beginner",
+    "complexity": 1,
+    "pacing": "fast",
+    "tone": [
+      "rom-com",
+      "steamy",
+      "spicy",
+      "heartwarming",
+      "contemporary"
+    ],
+    "page_count": 323,
+    "isbn": null,
+    "why_start_here": "A charming, spicy romance featuring a brilliant autistic woman and an affectionate escort."
+  },
+  {
+    "title": "People We Meet on Vacation",
+    "author": "Emily Henry",
+    "genres": [
+      "romance"
+    ],
+    "level": "beginner",
+    "complexity": 1,
+    "pacing": "fast",
+    "tone": [
+      "rom-com",
+      "friends-to-lovers",
+      "nostalgic",
+      "witty",
+      "mild"
+    ],
+    "page_count": 364,
+    "isbn": null,
+    "why_start_here": "A sun-soaked friends-to-lovers journey filled with nostalgic travel and poignant longing."
+  },
+  {
+    "title": "Better Than the Movies",
+    "author": "Lynn Painter",
+    "genres": [
+      "romance"
+    ],
+    "level": "beginner",
+    "complexity": 1,
+    "pacing": "fast",
+    "tone": [
+      "rom-com",
+      "fake dating",
+      "sweet",
+      "clean",
+      "humorous"
+    ],
+    "page_count": 356,
+    "isbn": null,
+    "why_start_here": "A hilarious, movie-loving rom-com filled with fake dating tropes and sweet banter."
+  },
+  {
+    "title": "Seven Days in June",
+    "author": "Tia Williams",
+    "genres": [
+      "romance"
+    ],
+    "level": "intermediate",
+    "complexity": 2,
+    "pacing": "medium",
+    "tone": [
+      "emotional",
+      "steamy",
+      "spicy",
+      "second chance",
+      "literary"
+    ],
+    "page_count": 336,
+    "isbn": null,
+    "why_start_here": "A sultry, emotionally profound second-chance romance between two bestselling authors."
+  },
+  {
+    "title": "Outlander",
+    "author": "Diana Gabaldon",
+    "genres": [
+      "romance",
+      "fantasy",
+      "historical"
+    ],
+    "level": "intermediate",
+    "complexity": 3,
+    "pacing": "medium",
+    "tone": [
+      "historical",
+      "steamy",
+      "spicy",
+      "adventure",
+      "epic"
+    ],
+    "page_count": 627,
+    "isbn": null,
+    "why_start_here": "An epic time-travel Scottish romance blending sweeping history with passion."
+  },
+  {
+    "title": "The Seven Husbands of Evelyn Hugo",
+    "author": "Taylor Jenkins Reid",
+    "genres": [
+      "romance",
+      "fiction"
+    ],
+    "level": "intermediate",
+    "complexity": 2,
+    "pacing": "medium",
+    "tone": [
+      "glamorous",
+      "emotional",
+      "queer",
+      "historical",
+      "drama"
+    ],
+    "page_count": 389,
+    "isbn": null,
+    "why_start_here": "A mesmerizing Old Hollywood tale of ruthless ambition, secrets, and forbidden love."
+  },
+  {
+    "title": "From Lukov with Love",
+    "author": "Mariana Zapata",
+    "genres": [
+      "romance"
+    ],
+    "level": "intermediate",
+    "complexity": 2,
+    "pacing": "slow",
+    "tone": [
+      "slow-burn",
+      "sports",
+      "enemies-to-lovers",
+      "steamy"
+    ],
+    "page_count": 546,
+    "isbn": null,
+    "why_start_here": "The masterclass of slow-burn figure skating enemies-to-partners romance."
+  },
+  {
+    "title": "Bridgerton: The Duke and I",
+    "author": "Julia Quinn",
+    "genres": [
+      "romance"
+    ],
+    "level": "intermediate",
+    "complexity": 2,
+    "pacing": "medium",
+    "tone": [
+      "historical",
+      "regency",
+      "steamy",
+      "witty",
+      "fake courtship"
+    ],
+    "page_count": 384,
+    "isbn": null,
+    "why_start_here": "Regency London high-society drama with fake courting and unforgettable passion."
+  },
+  {
+    "title": "The Song of Achilles",
+    "author": "Madeline Miller",
+    "genres": [
+      "romance",
+      "fantasy",
+      "classics"
+    ],
+    "level": "intermediate",
+    "complexity": 3,
+    "pacing": "medium",
+    "tone": [
+      "mythology",
+      "poetic",
+      "queer",
+      "tragic",
+      "emotional"
+    ],
+    "page_count": 378,
+    "isbn": null,
+    "why_start_here": "A lyrical retelling of the Iliad centered on the deep, tragic bond between Achilles and Patroclus."
+  },
+  {
+    "title": "Jane Eyre",
+    "author": "Charlotte Brontë",
+    "genres": [
+      "romance",
+      "classics"
+    ],
+    "level": "advanced",
+    "complexity": 4,
+    "pacing": "medium",
+    "tone": [
+      "gothic",
+      "literary",
+      "brooding",
+      "passionate",
+      "clean"
+    ],
+    "page_count": 507,
+    "isbn": null,
+    "why_start_here": "A timeless gothic romance of moral integrity, passion, and dark secrets at Thornfield Hall."
+  },
+  {
+    "title": "Wuthering Heights",
+    "author": "Emily Brontë",
+    "genres": [
+      "romance",
+      "classics",
+      "gothic"
+    ],
+    "level": "advanced",
+    "complexity": 5,
+    "pacing": "slow",
+    "tone": [
+      "dark",
+      "obsessive",
+      "gothic",
+      "intense",
+      "windswept"
+    ],
+    "page_count": 416,
+    "isbn": null,
+    "why_start_here": "A haunting masterpiece of turbulent obsession set on the bleak Yorkshire moors."
+  },
+  {
+    "title": "Possession",
+    "author": "A.S. Byatt",
+    "genres": [
+      "romance",
+      "fiction",
+      "mystery"
+    ],
+    "level": "advanced",
+    "complexity": 5,
+    "pacing": "slow",
+    "tone": [
+      "literary",
+      "intellectual",
+      "dual timeline",
+      "poetic"
+    ],
+    "page_count": 555,
+    "isbn": null,
+    "why_start_here": "A brilliant Booker Prize winner intertwining modern scholars with Victorian poets in romantic mystery."
+  },
+  {
+    "title": "The Maid",
+    "author": "Nita Prose",
+    "genres": [
+      "mystery",
+      "thriller"
+    ],
+    "level": "beginner",
+    "complexity": 1,
+    "pacing": "fast",
+    "tone": [
+      "whodunit",
+      "quirky",
+      "cozy mystery",
+      "charming"
+    ],
+    "page_count": 304,
+    "isbn": null,
+    "why_start_here": "A charming hotel whodunit with an eccentric maid at the heart of a murder investigation."
+  },
+  {
+    "title": "The Guest List",
+    "author": "Lucy Foley",
+    "genres": [
+      "thriller",
+      "mystery"
+    ],
+    "level": "beginner",
+    "complexity": 1,
+    "pacing": "fast",
+    "tone": [
+      "locked-room",
+      "suspenseful",
+      "multiple POVs",
+      "twisty"
+    ],
+    "page_count": 313,
+    "isbn": null,
+    "why_start_here": "A stormy wedding on a remote Irish island where someone turns up dead."
+  },
+  {
+    "title": "Sharp Objects",
+    "author": "Gillian Flynn",
+    "genres": [
+      "thriller"
+    ],
+    "level": "intermediate",
+    "complexity": 3,
+    "pacing": "medium",
+    "tone": [
+      "southern gothic",
+      "dark",
+      "psychological",
+      "haunting"
+    ],
+    "page_count": 254,
+    "isbn": null,
+    "why_start_here": "A chilling journey into family trauma and small-town murders in Missouri."
+  },
+  {
+    "title": "The Secret History",
+    "author": "Donna Tartt",
+    "genres": [
+      "thriller",
+      "classics"
+    ],
+    "level": "advanced",
+    "complexity": 5,
+    "pacing": "slow",
+    "tone": [
+      "dark academia",
+      "intellectual",
+      "atmospheric",
+      "morally grey"
+    ],
+    "page_count": 559,
+    "isbn": null,
+    "why_start_here": "The defining dark academia novel of obsession, Greek tragedy, and cold-blooded murder."
+  },
+  {
+    "title": "All Systems Red",
+    "author": "Martha Wells",
+    "genres": [
+      "sci-fi"
+    ],
+    "level": "beginner",
+    "complexity": 1,
+    "pacing": "fast",
+    "tone": [
+      "humorous",
+      "action",
+      "AI",
+      "cynical",
+      "fast-paced"
+    ],
+    "page_count": 144,
+    "isbn": null,
+    "why_start_here": "A punchy, witty novella following a security android that just wants to watch soap operas."
+  },
+  {
+    "title": "Dark Matter",
+    "author": "Blake Crouch",
+    "genres": [
+      "sci-fi",
+      "thriller"
+    ],
+    "level": "beginner",
+    "complexity": 1,
+    "pacing": "fast",
+    "tone": [
+      "multiverse",
+      "mind-bending",
+      "fast-paced",
+      "emotional"
+    ],
+    "page_count": 342,
+    "isbn": null,
+    "why_start_here": "A relentless multiverse thriller exploring the lives we could have lived."
+  },
+  {
+    "title": "Children of Time",
+    "author": "Adrian Tchaikovsky",
+    "genres": [
+      "sci-fi"
+    ],
+    "level": "intermediate",
+    "complexity": 3,
+    "pacing": "medium",
+    "tone": [
+      "hard sci-fi",
+      "evolution",
+      "epic",
+      "thought-provoking"
+    ],
+    "page_count": 600,
+    "isbn": null,
+    "why_start_here": "An extraordinary multi-generational space epic charting the uplift of sentient spiders."
+  },
+  {
+    "title": "The Three-Body Problem",
+    "author": "Cixin Liu",
+    "genres": [
+      "sci-fi"
+    ],
+    "level": "advanced",
+    "complexity": 4,
+    "pacing": "slow",
+    "tone": [
+      "hard sci-fi",
+      "cosmic dread",
+      "astrophysics",
+      "philosophical"
+    ],
+    "page_count": 390,
+    "isbn": null,
+    "why_start_here": "A vast cosmological mystery linking the Cultural Revolution to first contact."
+  },
+  {
+    "title": "Hyperion",
+    "author": "Dan Simmons",
+    "genres": [
+      "sci-fi"
+    ],
+    "level": "advanced",
+    "complexity": 5,
+    "pacing": "medium",
+    "tone": [
+      "literary",
+      "space opera",
+      "pilgrimage",
+      "philosophical"
+    ],
+    "page_count": 482,
+    "isbn": null,
+    "why_start_here": "A Canterbury Tales of the cosmos: seven pilgrims journey to face the terrifying Shrike."
+  },
+  {
+    "title": "Legends & Lattes",
+    "author": "Travis Baldree",
+    "genres": [
+      "fantasy"
+    ],
+    "level": "beginner",
+    "complexity": 1,
+    "pacing": "medium",
+    "tone": [
+      "cozy fantasy",
+      "low-stakes",
+      "coffee",
+      "heartwarming"
+    ],
+    "page_count": 318,
+    "isbn": null,
+    "why_start_here": "A gentle, heartwarming cozy fantasy about an orc warrior opening the city's first coffee shop."
+  },
+  {
+    "title": "The Way of Kings",
+    "author": "Brandon Sanderson",
+    "genres": [
+      "fantasy"
+    ],
+    "level": "advanced",
+    "complexity": 4,
+    "pacing": "medium",
+    "tone": [
+      "epic fantasy",
+      "worldbuilding",
+      "honor",
+      "sprawling"
+    ],
+    "page_count": 1007,
+    "isbn": null,
+    "why_start_here": "A towering epic fantasy masterpiece set on the storm-ravaged world of Roshar."
+  },
+  {
+    "title": "The Silmarillion",
+    "author": "J.R.R. Tolkien",
+    "genres": [
+      "fantasy",
+      "classics"
+    ],
+    "level": "advanced",
+    "complexity": 5,
+    "pacing": "slow",
+    "tone": [
+      "mythic",
+      "biblical",
+      "high fantasy",
+      "ancient"
+    ],
+    "page_count": 365,
+    "isbn": null,
+    "why_start_here": "The epic creation mythology of Arda, tracing the fall of the Elves and the struggle for the jewels."
+  },
+  {
+    "title": "The Hound of the Baskervilles",
+    "author": "Arthur Conan Doyle",
+    "genres": [
+      "mystery",
+      "classics"
+    ],
+    "level": "intermediate",
+    "complexity": 2,
+    "pacing": "medium",
+    "tone": [
+      "gothic mystery",
+      "deduction",
+      "atmospheric",
+      "eerie"
+    ],
+    "page_count": 256,
+    "isbn": null,
+    "why_start_here": "Sherlock Holmes and Dr. Watson investigate a spectral hound terrifying the Devonshire moors."
   }
 ]
