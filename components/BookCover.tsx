@@ -120,7 +120,6 @@ export function BookCover({
         src={cleanUrl}
         alt={`Cover of ${title}`}
         referrerPolicy="no-referrer"
-        crossOrigin="anonymous"
         loading="lazy"
         onLoad={() => setImageLoaded(true)}
         onError={() => setImageFailed(true)}
