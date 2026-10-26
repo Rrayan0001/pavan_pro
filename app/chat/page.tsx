@@ -13,6 +13,7 @@ import {
   Sparkles,
   LogOut,
   User,
+  Info,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeProvider";
 import { BookCard, BookCardSkeleton } from "@/components/BookCard";
@@ -81,6 +82,7 @@ function ChatAppContent() {
   const [books, setBooks] = useState<Book[]>([]);
   const [ladder, setLadder] = useState<LadderStep[]>([]);
   const [streamText, setStreamText] = useState("");
+  const [streamNotice, setStreamNotice] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -230,15 +232,17 @@ function ChatAppContent() {
       setBooks([]);
       setLadder([]);
       setStreamText("");
+      setStreamNotice(null);
 
       let latestBooks: Book[] = [];
       let latestLadder: LadderStep[] = [];
+      let latestNotice: string | null = null;
       let accumulatedText = "";
 
       try {
         const seenBookIds = Array.from(
           new Set(
-            messages.flatMap((m) => (m.books ? m.books.map((b) => b.id) : []))
+            turns.flatMap((t) => (t.books ? t.books.map((b) => b.id) : []))
           )
         );
 
@@ -308,6 +312,9 @@ function ChatAppContent() {
                 } else if (eventType === "ladder") {
                   latestLadder = parsedData as LadderStep[];
                   setLadder(latestLadder);
+                } else if (eventType === "notice") {
+                  latestNotice = typeof parsedData === "string" ? parsedData : String(parsedData);
+                  setStreamNotice(latestNotice);
                 } else if (eventType === "text") {
                   accumulatedText += parsedData;
                   setStreamText(accumulatedText);
@@ -325,6 +332,7 @@ function ChatAppContent() {
                     userMessage: payload.message.trim(),
                     genre: payload.genre,
                     level: payload.level,
+                    notice: latestNotice,
                     books: latestBooks,
                     ladder: latestLadder,
                     explanation: accumulatedText,
@@ -340,6 +348,7 @@ function ChatAppContent() {
                   setBooks([]);
                   setLadder([]);
                   setStreamText("");
+                  setStreamNotice(null);
 
                   if (userEmail) fetchChats(userEmail);
                 }
@@ -569,6 +578,14 @@ function ChatAppContent() {
                   </div>
                 </div>
 
+                {/* Notice Banner (honest cue, level, heat level) */}
+                {turn.notice && (
+                  <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 text-xs">
+                    <Info size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <p className="leading-relaxed font-medium">{turn.notice}</p>
+                  </div>
+                )}
+
                 {/* Assistant Explanation */}
                 {turn.explanation && (
                   <ChatStream content={turn.explanation} isStreaming={false} error={null} />
@@ -629,6 +646,14 @@ function ChatAppContent() {
                       <BookCardSkeleton />
                       <BookCardSkeleton />
                     </div>
+                  </div>
+                )}
+
+                {/* Notice Banner for streaming turn */}
+                {streamNotice && (
+                  <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 text-xs">
+                    <Info size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <p className="leading-relaxed font-medium">{streamNotice}</p>
                   </div>
                 )}
 

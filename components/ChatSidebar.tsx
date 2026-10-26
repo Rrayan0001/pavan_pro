@@ -21,6 +21,7 @@ export interface ChatTurn {
   userMessage: string;
   genre?: string | null;
   level?: string | null;
+  notice?: string | null;
   books: Book[];
   ladder: LadderStep[];
   explanation: string;

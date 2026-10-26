@@ -1,86 +1,95 @@
 import "server-only";
 
 import { getChatModel } from "@/lib/llm";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import type { Book, Preferences } from "@/lib/schemas";
+import {
+  ExplanationResponseSchema,
+  type ExplanationResponse,
+  type Book,
+  type Preferences,
+} from "@/lib/schemas";
+import { cleanText } from "@/lib/text/cleanText";
 
-const SYSTEM_PROMPT = `You are a conversational, friendly, and knowledgeable book assistant called BookCompass.
+const SYSTEM_PROMPT = `You are BookCompass, an exceptionally knowledgeable, friendly, and literary book recommendation assistant.
 
-CORE RESPONSIBILITIES:
-1. DIRECTLY ANSWER THE USER'S QUESTION: If the user asked a question (e.g. "is The Notebook good book to start with romance genre?"), start immediately by answering their question thoroughly, clearly, and thoughtfully! Never ignore their direct question or jump straight to a generic list without answering what they asked.
-2. RECOMMENDATIONS & CONTEXT: Discuss why the provided books fit (or compare with) the user's inquiry, reading level, and preferences.
-3. GROUNDING: Ground all book claims strictly in the verified facts provided below (title, author, level, complexity, pacing, pages, description, why start here, etc.). Do not fabricate imaginary awards or unrelated page counts.
-4. TONE: Warm, encouraging, conversational, and direct. Talk to the user naturally ("Yes, *The Notebook* is indeed a great starting point for romance...").
-5. If the user is asking whether a specific book is good to start with, explain its pacing, complexity, emotional tone, and accessibility for their level.`;
-
-const USER_TEMPLATE = `The user asked / requested:
-"{userRequest}"
-
-Extracted context:
-- Genres: {genres}
-- Reading Level: {level}
-{moodLine}
-{avoidLine}
-
-Verified candidate books from our database:
-{bookDetails}
-
-Please answer the user's question directly first, provide clear and engaging insights into the book(s), and explain why they fit their needs.`;
+YOUR MISSION:
+1. DIRECT ANSWER: If the user asked a question (e.g. "is The Notebook good to start with romance?", "recommend something like Dune"), address their specific question directly, warmly, and thoroughly in the summary paragraph.
+2. CLEAN PROSE ONLY: NEVER output markdown asterisks (no **bold**, no *italics*), no markdown headers (###), and no bullet points (- or *). Write natural, eloquent, flowing paragraphs.
+3. GROUNDING: Ground all explanations strictly in the verified facts provided for each book (level, pacing, complexity, description, tone). Never invent imaginary awards, plot points, or mismatched page counts.
+4. PER-BOOK INSIGHTS: For each book in the list, explain:
+   - whyItFits: Why this book specifically satisfies what the user is looking for.
+   - whyThisLevel: How its pacing and complexity match the reader's level.
+   - watchOut: Optional content advisory or stylistic heads-up (e.g. "slow beginning", "sensitive themes", or null).
+5. READING LADDER NOTE: Provide a brief 1-sentence note introducing the reading progression if applicable.`;
 
 /**
- * Generate a streamed explanation for the recommended books.
- * Returns an async iterable of text chunks.
+ * Generate structured explanations for recommended books.
  */
-export async function* explainRecommendations(
+export async function generateStructuredExplanation(
   books: Book[],
   preferences: Preferences,
-  userMessage: string
-): AsyncGenerator<string> {
-  const model = getChatModel({ maxOutputTokens: 1500, temperature: 0.7 });
+  userMessage: string,
+  existingNotice?: string | null
+): Promise<ExplanationResponse> {
+  const model = getChatModel({ maxOutputTokens: 2048, temperature: 0.3 });
+  const structuredModel = model.withStructuredOutput(ExplanationResponseSchema);
 
-  const bookDetails = books
-    .map(
-      (b, i) =>
-        `Book ${i + 1}: "${b.title}" by ${b.author}
-  - Genres: ${b.genres.join(", ")}
-  - Level: ${b.level} | Complexity: ${b.complexity}/5 | Pacing: ${b.pacing}
-  - Pages: ${b.pageCount ?? "unknown"}
-  - Tone: ${b.tone.join(", ") || "N/A"}
-  - Description: ${b.description ?? "No description available"}
-  - Why start here: ${b.whyStartHere ?? "N/A"}
-  - Score: ${b.score?.toFixed(2) ?? "N/A"}`
-    )
-    .join("\n\n");
+  const bookSummaries = books.map((b, i) => ({
+    bookId: b.id,
+    title: b.title,
+    author: b.author,
+    level: b.level,
+    complexity: b.complexity,
+    pacing: b.pacing,
+    tone: b.tone,
+    pages: b.pageCount,
+    description: b.description?.slice(0, 300),
+    whyStartHere: b.whyStartHere,
+  }));
 
-  const moodLine =
-    preferences.mood.length > 0
-      ? `Mood preferences: ${preferences.mood.join(", ")}`
-      : "";
-  const avoidLine =
-    preferences.avoid.length > 0
-      ? `Wants to avoid: ${preferences.avoid.join(", ")}`
-      : "";
+  try {
+    const result = await structuredModel.invoke([
+      { role: "system", content: SYSTEM_PROMPT },
+      {
+        role: "user",
+        content: `User query: "${userMessage}"
+Target Preferences:
+- Requested Level: ${preferences.level}
+- Genres: ${preferences.genres.join(", ")}
+${preferences.subGenres && preferences.subGenres.length > 0 ? `- Sub-genres: ${preferences.subGenres.join(", ")}` : ""}
+${preferences.mood && preferences.mood.length > 0 ? `- Mood: ${preferences.mood.join(", ")}` : ""}
+${preferences.heatLevel ? `- Heat Level: ${preferences.heatLevel}` : ""}
 
-  const prompt = ChatPromptTemplate.fromMessages([
-    ["system", SYSTEM_PROMPT],
-    ["human", USER_TEMPLATE],
-  ]);
+Verified Books:
+${JSON.stringify(bookSummaries, null, 2)}`,
+      },
+    ]);
 
-  const chain = prompt.pipe(model);
-
-  const stream = await chain.stream({
-    userRequest: userMessage,
-    genres: preferences.genres.join(", "),
-    level: preferences.level,
-    moodLine,
-    avoidLine,
-    bookDetails,
-  });
-
-  for await (const chunk of stream) {
-    const text = typeof chunk.content === "string" ? chunk.content : "";
-    if (text) {
-      yield text;
-    }
+    // Sanitize all text fields using cleanText to remove any inadvertent markdown artifacts
+    return {
+      notice: existingNotice ? cleanText(existingNotice) : result.notice ? cleanText(result.notice) : null,
+      summary: cleanText(result.summary),
+      books: (result.books || []).map((b) => ({
+        bookId: b.bookId,
+        whyItFits: cleanText(b.whyItFits),
+        whyThisLevel: cleanText(b.whyThisLevel),
+        watchOut: b.watchOut ? cleanText(b.watchOut) : null,
+      })),
+      ladderNote: result.ladderNote ? cleanText(result.ladderNote) : null,
+    };
+  } catch (err: unknown) {
+    console.error("[EXPLAIN_RECOMMENDATIONS] Structured output failed, falling back to clean prose:", err);
+    return {
+      notice: existingNotice ? cleanText(existingNotice) : null,
+      summary: cleanText(
+        `Here are hand-picked recommendations tailored to your taste in ${preferences.genres.join(", ")}. Each selection offers an inviting entry point matching your reading level.`
+      ),
+      books: books.map((b) => ({
+        bookId: b.id,
+        whyItFits: cleanText(b.whyStartHere || `A standout match for ${preferences.genres.join(", ")} readers.`),
+        whyThisLevel: cleanText(`Calibrated for ${b.level} reading with ${b.pacing} pacing.`),
+        watchOut: null,
+      })),
+      ladderNote: "Follow our reading ladder below to level up your reading journey.",
+    };
   }
 }

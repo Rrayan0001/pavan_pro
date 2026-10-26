@@ -83,12 +83,28 @@ export function BookCard({ book, index }: BookCardProps) {
             ))}
           </div>
 
-          {/* Why this book */}
-          {book.whyStartHere && (
-            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+          {/* Why this book / Structured explanation */}
+          {book.whyItFits ? (
+            <div className="mt-2.5 space-y-1.5 text-xs">
+              <p className="text-foreground/90 font-medium leading-relaxed">
+                {book.whyItFits}
+              </p>
+              {book.whyThisLevel && (
+                <p className="text-muted-foreground leading-relaxed">
+                  <span className="font-semibold text-foreground/80">Level Fit:</span> {book.whyThisLevel}
+                </p>
+              )}
+              {book.watchOut && (
+                <p className="text-amber-600 dark:text-amber-400 font-medium">
+                  Note: {book.watchOut}
+                </p>
+              )}
+            </div>
+          ) : book.whyStartHere ? (
+            <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
               {book.whyStartHere}
             </p>
-          )}
+          ) : null}
 
           {/* Amazon link */}
           {book.amazonSearchUrl && (
