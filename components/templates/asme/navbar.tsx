@@ -2,13 +2,11 @@
 
 import Link from 'next/link';
 import { Compass, User, MessageSquare, LogOut } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeProvider';
 
 const NAV_LINKS = [
-  { label: 'Discover', href: '#discover' },
-  { label: 'Reading Ladder', href: '#ladder' },
-  { label: 'Methodology', href: '#methodology' },
   { label: 'Features', href: '#features' },
+  { label: 'Methodology', href: '#methodology' },
+  { label: 'About', href: '#about' },
 ];
 
 interface NavbarProps {
@@ -19,7 +17,7 @@ interface NavbarProps {
 export const Navbar = ({ userEmail, onLogout }: NavbarProps) => {
   return (
     <header className="relative z-30 px-4 sm:px-6 py-6">
-      <nav className="liquid-glass mx-auto flex max-w-6xl items-center justify-between rounded-full px-4 sm:px-6 py-3">
+      <nav className="liquid-glass mx-auto flex max-w-5xl items-center justify-between rounded-full px-5 sm:px-8 py-3.5">
         <div className="flex items-center gap-3">
           <Link href="/" aria-label="BookCompass home" className="flex items-center gap-2.5">
             <div className="flex size-8 items-center justify-center rounded-full bg-foreground/10 text-foreground">
@@ -28,7 +26,7 @@ export const Navbar = ({ userEmail, onLogout }: NavbarProps) => {
             <span className="text-base sm:text-lg font-semibold tracking-tight text-foreground">BookCompass</span>
           </Link>
 
-          <div className="ms-6 hidden items-center gap-6 lg:flex">
+          <div className="ms-8 hidden items-center gap-7 md:flex">
             {NAV_LINKS.map((link) => (
               <a
                 key={link.label}
@@ -41,11 +39,9 @@ export const Navbar = ({ userEmail, onLogout }: NavbarProps) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          <ThemeToggle />
-
+        <div className="flex items-center gap-3">
           {userEmail ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <Link
                 href="/chat"
                 className="liquid-glass flex items-center gap-1.5 rounded-full px-4 py-2 text-xs sm:text-sm font-medium text-foreground transition-all hover:bg-foreground/10 cursor-pointer shadow-sm"
@@ -57,7 +53,7 @@ export const Navbar = ({ userEmail, onLogout }: NavbarProps) => {
                 type="button"
                 onClick={onLogout}
                 title="Log out"
-                className="liquid-glass flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-foreground/80 transition-all hover:bg-foreground/10 hover:text-foreground cursor-pointer"
+                className="liquid-glass flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-foreground/70 transition-all hover:bg-foreground/10 hover:text-foreground cursor-pointer"
               >
                 <LogOut size={13} />
                 <span className="hidden sm:inline">Logout</span>
@@ -67,7 +63,7 @@ export const Navbar = ({ userEmail, onLogout }: NavbarProps) => {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="liquid-glass rounded-full px-5 py-2 text-xs sm:text-sm font-medium text-foreground transition-all hover:bg-foreground/10 cursor-pointer flex items-center gap-1.5 shadow-sm"
+                className="liquid-glass rounded-full px-6 py-2 text-xs sm:text-sm font-medium text-foreground transition-all hover:bg-foreground/10 cursor-pointer flex items-center gap-1.5 shadow-sm"
               >
                 <User size={14} />
                 <span>Sign In</span>

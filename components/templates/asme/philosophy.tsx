@@ -39,7 +39,7 @@ export const Philosophy = () => {
           >
             {!videoFailed ? (
               <video
-                className="h-full w-full object-cover opacity-70"
+                className="h-full w-full object-cover"
                 src={PHILOSOPHY_VIDEO_URL}
                 muted
                 autoPlay

@@ -1,16 +1,16 @@
 'use client';
 
 import { Compass } from 'lucide-react';
-import { InstagramIcon, Serif, TwitterIcon, GithubIcon } from './primitives';
+import { Serif, GithubIcon } from './primitives';
 
 const FOOTER_COLUMNS = [
   {
     heading: 'Discovery',
     links: [
-      { label: 'AI Recommender', href: '#discover' },
-      { label: 'Reading Ladders', href: '#ladder' },
+      { label: 'AI Recommender', href: '/chat' },
+      { label: 'Reading Ladders', href: '#features' },
       { label: 'Methodology', href: '#methodology' },
-      { label: 'Engine Features', href: '#features' },
+      { label: 'About Compass', href: '#about' },
     ],
   },
   {
@@ -34,8 +34,6 @@ const FOOTER_COLUMNS = [
 
 const SOCIAL_LINKS = [
   { label: 'GitHub', Icon: GithubIcon, href: 'https://github.com/Vijju-15/BookCompass' },
-  { label: 'Twitter', Icon: TwitterIcon, href: 'https://twitter.com' },
-  { label: 'Instagram', Icon: InstagramIcon, href: 'https://instagram.com' },
 ];
 
 export const Footer = () => {

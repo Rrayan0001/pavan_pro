@@ -3,25 +3,26 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-background: #ffffff;
-  --color-foreground: #0a0a0a;
-  --color-muted: #f5f5f5;
-  --color-muted-foreground: #737373;
-  --color-border: #e5e5e5;
-  --color-input: #e5e5e5;
-  --color-ring: #0a0a0a;
-  --color-primary: #6d28d9;
+  /* Light Mode: Vintage Library & Garden Linen */
+  --color-background: #faf7f2;
+  --color-foreground: #221c16;
+  --color-muted: #efe8dc;
+  --color-muted-foreground: #6e6255;
+  --color-border: #e3d8ca;
+  --color-input: #ebe1d2;
+  --color-ring: #2a5940;
+  --color-primary: #2a5940;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #f5f5f5;
-  --color-secondary-foreground: #171717;
-  --color-accent: #f5f5f5;
-  --color-accent-foreground: #171717;
-  --color-destructive: #ef4444;
+  --color-secondary: #f0e8db;
+  --color-secondary-foreground: #221c16;
+  --color-accent: #ede4d4;
+  --color-accent-foreground: #221c16;
+  --color-destructive: #c0392b;
   --color-destructive-foreground: #ffffff;
   --color-card: #ffffff;
-  --color-card-foreground: #0a0a0a;
+  --color-card-foreground: #221c16;
   --color-popover: #ffffff;
-  --color-popover-foreground: #0a0a0a;
+  --color-popover-foreground: #221c16;
 
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: 0.25rem;
@@ -31,26 +32,27 @@
 }
 
 @layer base {
+  /* Dark Mode: Soft Night Mountain & Alpine Starlight */
   .dark {
-    --color-background: #0a0a0a;
-    --color-foreground: #fafafa;
-    --color-muted: #262626;
-    --color-muted-foreground: #a3a3a3;
-    --color-border: #262626;
-    --color-input: #262626;
-    --color-ring: #d4d4d4;
-    --color-primary: #8b5cf6;
-    --color-primary-foreground: #ffffff;
-    --color-secondary: #262626;
-    --color-secondary-foreground: #fafafa;
-    --color-accent: #262626;
-    --color-accent-foreground: #fafafa;
-    --color-destructive: #ef4444;
+    --color-background: #0b0e14;
+    --color-foreground: #e6edf5;
+    --color-muted: #151c28;
+    --color-muted-foreground: #8295ab;
+    --color-border: #1e2838;
+    --color-input: #151c28;
+    --color-ring: #7ea3cc;
+    --color-primary: #7ea3cc;
+    --color-primary-foreground: #090e16;
+    --color-secondary: #141a24;
+    --color-secondary-foreground: #e6edf5;
+    --color-accent: #17202d;
+    --color-accent-foreground: #e6edf5;
+    --color-destructive: #e05252;
     --color-destructive-foreground: #ffffff;
-    --color-card: #171717;
-    --color-card-foreground: #fafafa;
-    --color-popover: #171717;
-    --color-popover-foreground: #fafafa;
+    --color-card: #10151f;
+    --color-card-foreground: #e6edf5;
+    --color-popover: #10151f;
+    --color-popover-foreground: #e6edf5;
   }
 }
 

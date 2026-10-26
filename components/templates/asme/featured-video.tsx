@@ -26,7 +26,7 @@ export const FeaturedVideo = () => {
         <motion.div {...reveal({ y: 60, duration: 0.9 })} className="relative aspect-video overflow-hidden rounded-3xl border border-foreground/10 bg-zinc-950">
           {!videoFailed ? (
             <video
-              className="h-full w-full object-cover opacity-60"
+              className="h-full w-full object-cover"
               src={FEATURED_VIDEO_URL}
               muted
               autoPlay
