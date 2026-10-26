@@ -74,22 +74,12 @@ export const Hero = ({
           </div>
         </form>
 
-        {/* Narrative Tagline */}
-        <p className="mt-6 max-w-md px-4 text-xs sm:text-sm leading-relaxed text-white/80">
-          Discover grounded literature recommendations, verified authors, and progressive reading ladders. Zero hallucinations.
-        </p>
-
-        {/* Manifesto Action Pill */}
-        <button
-          type="button"
-          onClick={() => {
-            const el = document.getElementById('about');
-            el?.scrollIntoView({ behavior: 'smooth' });
-          }}
-          className="liquid-glass mt-8 rounded-full px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-white/10 cursor-pointer"
-        >
-          Manifesto
-        </button>
+        {/* Narrative Tagline - Liquid-Glass Pill Badge matching input shape */}
+        <div className="liquid-glass mt-5 w-full max-w-lg rounded-full px-6 py-3 border border-white/15 bg-black/60 backdrop-blur-xl shadow-xl">
+          <p className="text-xs sm:text-sm leading-relaxed text-white/90 font-medium">
+            Discover grounded literature recommendations, verified authors, and progressive reading ladders. Zero hallucinations.
+          </p>
+        </div>
       </div>
     </section>
   );
