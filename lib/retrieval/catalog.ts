@@ -6,6 +6,14 @@ import { searchGoogleBooks } from "@/lib/retrieval/googleBooks";
 import type { Preferences, Book, Level } from "@/lib/schemas";
 import { amazonSearchUrl } from "@/lib/utils";
 
+export interface RetrievalStats {
+  sqlCount: number;
+  vectorCount: number;
+  googleBooksCount: number;
+  total: number;
+  errors: string[];
+}
+
 /**
  * Search the curated book catalog using SQL filters + vector similarity,
  * augmented with live Google Books API results for queries with specific moods/subgenres.
@@ -14,25 +22,41 @@ import { amazonSearchUrl } from "@/lib/utils";
 export async function searchCatalog(
   preferences: Preferences,
   limit: number = 10,
-  rawUserMessage?: string
+  rawUserMessage?: string,
+  statsCollector?: RetrievalStats
 ): Promise<Book[]> {
   const results: Book[] = [];
 
   // Step 0: If user asked about a specific book title, look for exact or ilike title match first!
   if (preferences.targetBookQuery) {
-    const { data: titleMatches } = await supabase
-      .from("books")
-      .select("*")
-      .ilike("title", `%${preferences.targetBookQuery.trim()}%`)
-      .limit(3);
+    try {
+      const { data: titleMatches, error: titleErr } = await supabase
+        .from("books")
+        .select("*")
+        .ilike("title", `%${preferences.targetBookQuery.trim()}%`)
+        .limit(3);
 
-    if (titleMatches && titleMatches.length > 0) {
-      results.push(...titleMatches.map(rowToBook));
+      if (titleErr && statsCollector) {
+        statsCollector.errors.push(`[STAGE 4: Title match error]: ${titleErr.message}`);
+      }
+
+      if (titleMatches && titleMatches.length > 0) {
+        results.push(...titleMatches.map(rowToBook));
+      }
+    } catch (err: unknown) {
+      if (statsCollector) statsCollector.errors.push(`[STAGE 4: Title search exception]: ${String(err)}`);
     }
   }
 
   // Step 1: SQL filter for exact genre + level matches
-  const sqlBooks = await sqlFilterBooks(preferences, limit);
+  let sqlBooks: Book[] = [];
+  try {
+    sqlBooks = await sqlFilterBooks(preferences, limit);
+  } catch (err: unknown) {
+    if (statsCollector) statsCollector.errors.push(`[STAGE 4: SQL filter exception]: ${String(err)}`);
+  }
+  if (statsCollector) statsCollector.sqlCount = sqlBooks.length;
+
   const existingIds = new Set(results.map((b) => b.id));
   for (const b of sqlBooks) {
     if (!existingIds.has(b.id)) {
@@ -43,7 +67,13 @@ export async function searchCatalog(
 
   // Step 2: Vector similarity search if we have mood/similarTo cues
   if (preferences.mood.length > 0 || preferences.similarTo.length > 0 || preferences.targetBookQuery) {
-    const vectorBooks = await vectorSearchBooks(preferences, limit);
+    let vectorBooks: Book[] = [];
+    try {
+      vectorBooks = await vectorSearchBooks(preferences, limit);
+    } catch (err: unknown) {
+      if (statsCollector) statsCollector.errors.push(`[STAGE 4: Vector search exception]: ${String(err)}`);
+    }
+    if (statsCollector) statsCollector.vectorCount = vectorBooks.length;
 
     for (const book of vectorBooks) {
       if (!existingIds.has(book.id)) {
@@ -53,9 +83,8 @@ export async function searchCatalog(
     }
   }
 
-  // Step 3: Live Google Books API search for diverse, real-time candidates
-  // This ensures users aren't limited to the curated seed database when asking for
-  // specific subgenres (e.g. "rom-com thriller", "enemies to lovers") or niche tastes.
+  // Step 3: Live Google Books API search
+  let gbCount = 0;
   try {
     const isSpecificQuery =
       preferences.mood.length > 0 ||
@@ -83,6 +112,7 @@ export async function searchCatalog(
       const queryString = searchTerms.join(" ").trim();
       if (queryString) {
         const apiCandidates = await searchGoogleBooks(queryString, 8);
+        gbCount = apiCandidates.length;
         for (const apiBook of apiCandidates) {
           if (!apiBook.title || !apiBook.author) continue;
 
@@ -129,8 +159,14 @@ export async function searchCatalog(
         }
       }
     }
-  } catch (apiErr) {
+  } catch (apiErr: unknown) {
     console.error("Live Google Books candidate retrieval failed:", apiErr);
+    if (statsCollector) statsCollector.errors.push(`[STAGE 4: Google Books error]: ${String(apiErr)}`);
+  }
+
+  if (statsCollector) {
+    statsCollector.googleBooksCount = gbCount;
+    statsCollector.total = results.length;
   }
 
   return results;

@@ -119,10 +119,10 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full liquid-glass rounded-2xl py-3 px-5 text-sm font-semibold text-background bg-foreground hover:opacity-90 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-50"
+              className="w-full rounded-2xl py-3.5 px-5 text-sm font-semibold text-white bg-white/20 hover:bg-white/30 border border-white/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
             >
-              <span>{isSubmitting ? "Connecting..." : "Continue with Email"}</span>
-              <ArrowRight size={16} />
+              <span className="text-white font-medium">{isSubmitting ? "Connecting..." : "Continue with Email"}</span>
+              <ArrowRight size={16} className="text-white" />
             </button>
           </form>
 
@@ -135,7 +135,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleGuest}
-            className="w-full liquid-glass rounded-2xl py-2.5 px-4 text-xs font-medium text-foreground/70 hover:text-foreground transition-all cursor-pointer"
+            className="w-full rounded-2xl py-2.5 px-4 text-xs font-medium text-white/80 hover:text-white bg-white/5 hover:bg-white/10 border border-white/15 transition-all cursor-pointer"
           >
             Continue as Guest (without saving chats)
           </button>

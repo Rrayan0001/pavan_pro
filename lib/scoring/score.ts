@@ -126,11 +126,19 @@ export function matchesAvoidList(
   );
 }
 
+export interface ScoreBreakdown {
+  levelMatch: number;
+  genreMatch: number;
+  semanticSimilarity: number;
+  rating: number;
+  lengthFit: number;
+  total: number;
+}
+
 /**
- * Compute the total score for a book.
- * Returns a number between 0 and 1.
+ * Compute the detailed score breakdown for a book.
  */
-export function scoreBook(input: ScoringInput): number {
+export function scoreBookDetailed(input: ScoringInput): ScoreBreakdown {
   const w = SCORING_WEIGHTS;
 
   const levelScore = scoreLevelMatch(input.bookLevel, input.targetLevel);
@@ -146,10 +154,9 @@ export function scoreBook(input: ScoringInput): number {
     w.rating * ratingScore +
     w.lengthFit * lengthScore;
 
-  // Apply avoid penalty
   if (
     matchesAvoidList(
-      "", // title checked separately in pipeline
+      "",
       input.bookTone,
       input.bookGenres,
       input.avoidList
@@ -158,5 +165,20 @@ export function scoreBook(input: ScoringInput): number {
     total *= AVOID_PENALTY;
   }
 
-  return clamp(total, 0, 1);
+  return {
+    levelMatch: levelScore,
+    genreMatch: genreScore,
+    semanticSimilarity: semanticScore,
+    rating: ratingScore,
+    lengthFit: lengthScore,
+    total: clamp(total, 0, 1),
+  };
+}
+
+/**
+ * Compute the total score for a book.
+ * Returns a number between 0 and 1.
+ */
+export function scoreBook(input: ScoringInput): number {
+  return scoreBookDetailed(input).total;
 }

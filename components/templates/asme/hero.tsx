@@ -3,46 +3,20 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
-import { motion, useReducedMotion } from 'framer-motion';
 
 import { Navbar } from './navbar';
 
-const HERO_VIDEO_URL = '/hero.mp4';
-const FADE_MS = 500;
-const FADE_OUT_LEAD_S = 0.55;
-const RESTART_DELAY_MS = 100;
-
 interface HeroProps {
-  videoSrc?: string;
-  posterSrc?: string;
   userEmail?: string | null;
   onLogout?: () => void;
 }
 
 export const Hero = ({
-  videoSrc = HERO_VIDEO_URL,
-  posterSrc,
   userEmail,
   onLogout,
 }: HeroProps) => {
   const router = useRouter();
-  const reduced = useReducedMotion();
-  const restartTimerRef = React.useRef<number | null>(null);
-  const [isVisible, setIsVisible] = React.useState(false);
-  const [videoFailed, setVideoFailed] = React.useState(false);
   const [email, setEmail] = React.useState('');
-
-  const play = (video: HTMLVideoElement) => {
-    void video.play()?.catch(() => undefined);
-  };
-
-  const attachVideo = React.useCallback((video: HTMLVideoElement | null) => {
-    if (video && video.readyState >= 3) setIsVisible(true);
-
-    return () => {
-      if (restartTimerRef.current) window.clearTimeout(restartTimerRef.current);
-    };
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,50 +32,12 @@ export const Hero = ({
 
   return (
     <section className="relative flex min-h-screen flex-col overflow-hidden bg-background">
-      {/* Video Background (Full-Color, Natural Vibrancy - No B&W wash) */}
-      {videoFailed ? (
-        <div
-          aria-hidden
-          className="glow-top absolute inset-0 bg-cover bg-bottom"
-          style={posterSrc ? { backgroundImage: `url(${posterSrc})` } : undefined}
-        />
-      ) : (
-        <motion.video
-          ref={attachVideo}
-          className="absolute inset-0 h-full w-full object-cover object-bottom"
-          src={videoSrc}
-          poster={posterSrc}
-          muted
-          autoPlay
-          playsInline
-          preload="auto"
-          aria-hidden
-          tabIndex={-1}
-          loop={reduced ?? false}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isVisible ? 1 : 0 }}
-          transition={{ duration: reduced ? 0 : FADE_MS / 1000, ease: 'linear' }}
-          onCanPlay={(event) => {
-            if (isVisible) return;
-            play(event.currentTarget);
-            setIsVisible(true);
-          }}
-          onTimeUpdate={(event) => {
-            const video = event.currentTarget;
-            if (reduced || !isVisible || !Number.isFinite(video.duration)) return;
-            if (video.duration - video.currentTime <= FADE_OUT_LEAD_S) setIsVisible(false);
-          }}
-          onEnded={(event) => {
-            const video = event.currentTarget;
-            restartTimerRef.current = window.setTimeout(() => {
-              video.currentTime = 0;
-              play(video);
-              setIsVisible(true);
-            }, RESTART_DELAY_MS);
-          }}
-          onError={() => setVideoFailed(true)}
-        />
-      )}
+      {/* Background Image: cosmic.png for instant, lightweight rendering without video decoder overhead */}
+      <img
+        src="/cosmic.png"
+        alt="Cosmic Night Sky"
+        className="absolute inset-0 h-full w-full object-cover object-bottom"
+      />
 
       {/* Floating Pill Navbar */}
       <Navbar userEmail={userEmail} onLogout={onLogout} />

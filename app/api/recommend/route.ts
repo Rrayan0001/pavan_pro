@@ -3,15 +3,32 @@ import { RecommendRequestSchema } from "@/lib/schemas";
 import { parsePreferences } from "@/lib/chains/parsePreferences";
 import { explainRecommendations } from "@/lib/chains/explainRecommendations";
 import { searchCatalog, getReadingLadder } from "@/lib/retrieval/catalog";
-import { scoreBook, type ScoringInput } from "@/lib/scoring/score";
+import { scoreBookDetailed, type ScoringInput } from "@/lib/scoring/score";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { formatSSE } from "@/lib/utils";
 import { supabase } from "@/lib/db/supabase";
 import type { Book } from "@/lib/schemas";
+import type { RetrievalStats } from "@/lib/retrieval/catalog";
 
 export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
+  const isDebug = request.nextUrl.searchParams.get("debug") === "1" && process.env.NODE_ENV !== "production";
+  const debugStages: {
+    stage1_rawRequest: Record<string, unknown>;
+    stage2_parsedPreferences: Record<string, unknown> | null;
+    stage3_finalMergedPreferences: Record<string, unknown> | null;
+    stage4_candidateRetrieval: RetrievalStats | null;
+    stage5_scoreBreakdown: Record<string, unknown>[];
+    stage6_finalBookIds: string[];
+  } = {
+    stage1_rawRequest: {},
+    stage2_parsedPreferences: null,
+    stage3_finalMergedPreferences: null,
+    stage4_candidateRetrieval: null,
+    stage5_scoreBreakdown: [],
+    stage6_finalBookIds: [],
+  };
   try {
     // Get client IP for rate limiting
     const ip =
@@ -65,20 +82,48 @@ export async function POST(request: NextRequest) {
 
     const { message, genre, level, email, chatId } = parsed.data;
 
+    // Stage 1: Raw request
+    debugStages.stage1_rawRequest = { message, genre, level, email, chatId };
+    console.log("[STAGE 1: Raw Request]", debugStages.stage1_rawRequest);
+
     // Start SSE stream
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // [1] Parse user preferences
-          const { preferences, inferredLevel } = await parsePreferences(
-            message,
-            genre,
-            level
-          );
+          // Stage 2 & 3: Parse user preferences
+          let parseSuccess = true;
+          let parsedPrefResult;
+          try {
+            parsedPrefResult = await parsePreferences(message, genre, level);
+          } catch (pErr: unknown) {
+            parseSuccess = false;
+            console.error("[STAGE 2: Preference parsing error]", pErr);
+            throw pErr;
+          }
 
-          // [2] Search catalog and live Google Books for candidates
-          const candidates = await searchCatalog(preferences, 15, message);
+          const { preferences, inferredLevel } = parsedPrefResult;
+          debugStages.stage2_parsedPreferences = {
+            preferences,
+            parseSucceeded: parseSuccess,
+            inferredLevel,
+          };
+          debugStages.stage3_finalMergedPreferences = { ...preferences };
+          console.log("[STAGE 2: Parsed Preferences]", debugStages.stage2_parsedPreferences);
+          console.log("[STAGE 3: Merged Preferences]", debugStages.stage3_finalMergedPreferences);
+
+          // Stage 4: Candidate retrieval
+          const statsCollector: RetrievalStats = {
+            sqlCount: 0,
+            vectorCount: 0,
+            googleBooksCount: 0,
+            total: 0,
+            errors: [],
+          };
+
+          const candidates = await searchCatalog(preferences, 15, message, statsCollector);
+          debugStages.stage4_candidateRetrieval = statsCollector;
+          console.log("[STAGE 4: Candidate Retrieval]", statsCollector);
 
           if (candidates.length === 0) {
             controller.enqueue(
@@ -86,12 +131,15 @@ export async function POST(request: NextRequest) {
                 formatSSE("error", "No books found matching your preferences. Try broadening your search!")
               )
             );
+            if (isDebug) {
+              controller.enqueue(encoder.encode(formatSSE("debug", debugStages)));
+            }
             controller.enqueue(encoder.encode(formatSSE("done", null)));
             controller.close();
             return;
           }
 
-          // [3] Score all candidates
+          // Stage 5: Per-candidate score breakdown
           const scoredBooks: Book[] = candidates
             .map((book) => {
               const input: ScoringInput = {
@@ -105,7 +153,8 @@ export async function POST(request: NextRequest) {
                 targetGenres: preferences.genres,
                 avoidList: preferences.avoid,
               };
-              let score = scoreBook(input);
+              const breakdown = scoreBookDetailed(input);
+              let score = breakdown.total;
 
               // If the user was asking specifically about this book title, prioritize it to the top!
               if (
@@ -115,10 +164,26 @@ export async function POST(request: NextRequest) {
                 score = Math.max(score, 0.98);
               }
 
+              debugStages.stage5_scoreBreakdown.push({
+                bookId: book.id,
+                title: book.title,
+                breakdown,
+                finalScore: score,
+              });
+
               return { ...book, score };
             })
             .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
             .slice(0, 5);
+
+          // Stage 6: Final list of book IDs
+          debugStages.stage6_finalBookIds = scoredBooks.map((b) => b.id);
+          console.log("[STAGE 5: Score Breakdown Count]", debugStages.stage5_scoreBreakdown.length);
+          console.log("[STAGE 6: Final Book IDs]", debugStages.stage6_finalBookIds);
+
+          if (isDebug) {
+            controller.enqueue(encoder.encode(formatSSE("debug", debugStages)));
+          }
 
           // Send book cards
           controller.enqueue(

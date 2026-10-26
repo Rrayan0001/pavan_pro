@@ -58,6 +58,15 @@ const LEVEL_OPTIONS: { value: Level; label: string }[] = [
   { value: "advanced", label: "Advanced" },
 ];
 
+const CHAT_QUICK_PROMPTS = [
+  { label: "Rom-com with witty banter", query: "Delightful rom-com with witty banter and slow-burn chemistry", genre: "romance" as Genre },
+  { label: "Psychological thriller twist", query: "Fast-paced psychological thriller with unreliable narrator and shocking twist", genre: "thriller" as Genre },
+  { label: "Hard sci-fi & space physics", query: "Realistic hard sci-fi exploring space physics, exploration, and first contact", genre: "sci-fi" as Genre },
+  { label: "Deep psychology & human nature", query: "Engaging non-fiction exploring human behavior, psychology, and decision making", genre: "non-fiction" as Genre },
+  { label: "Epic immersive fantasy", query: "Immersive fantasy with rich worldbuilding and intricate magic system", genre: "fantasy" as Genre },
+  { label: "Cozy rainy-day mystery", query: "Cozy murder mystery set in a small English village or bookshop", genre: "mystery" as Genre },
+];
+
 function ChatAppContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -498,17 +507,41 @@ function ChatAppContent() {
 
             {/* Empty Greeting State */}
             {turns.length === 0 && !isLoading && !isStreaming && !currentPrompt && (
-              <div className="py-16 text-center space-y-4 max-w-lg mx-auto">
+              <div className="py-12 text-center space-y-6 max-w-xl mx-auto">
                 <div className="size-12 mx-auto rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
                   <Sparkles size={24} />
                 </div>
-                <h2 className="text-2xl font-bold tracking-tight text-foreground">
-                  What would you like to read next?
-                </h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Ask any question about books, describe a premise or tone, or explore recommendations
-                  grounded in verified metadata and progressive reading ladders.
-                </p>
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                    What would you like to read next?
+                  </h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+                    Ask any question about books, describe a premise or tone, or explore recommendations
+                    grounded in verified metadata and progressive reading ladders.
+                  </p>
+                </div>
+
+                <div className="pt-2 space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Try a popular prompt:
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {CHAT_QUICK_PROMPTS.map((p) => (
+                      <button
+                        key={p.label}
+                        type="button"
+                        onClick={() => {
+                          setInputMessage(p.query);
+                          setSelectedGenre(p.genre);
+                          handleRecommend({ message: p.query, genre: p.genre, level: selectedLevel });
+                        }}
+                        className="px-3.5 py-1.5 rounded-full border border-border bg-card/80 hover:bg-muted text-xs font-medium text-foreground transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 

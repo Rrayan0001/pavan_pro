@@ -24,7 +24,7 @@ export type Level = (typeof LEVELS)[number];
 export const PreferencesSchema = z.object({
   genres: z.array(z.enum(GENRES)).min(1),
   level: z.enum(LEVELS).default("beginner"),
-  maxPages: z.number().int().positive().optional(),
+  maxPages: z.number().int().min(1).optional(),
   mood: z.array(z.string()).default([]),
   similarTo: z.array(z.string()).default([]),
   avoid: z.array(z.string()).default([]),
